@@ -5,56 +5,205 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Enterprise Knowledge Assistant</title>
     <style>
-      body {
-        color: #172033;
-        font-family: system-ui, sans-serif;
-        line-height: 1.5;
-        margin: 0 auto;
-        max-width: 760px;
-        padding: 2rem 1rem;
+      :root {
+        --paper: #f4f1e8;
+        --paper-bright: #fbfaf5;
+        --ink: #17151f;
+        --muted: #77727e;
+        --line: rgba(23, 21, 31, 0.16);
+        --lime: #c7ff45;
+        --violet: #6f4ef6;
       }
+      * { box-sizing: border-box; }
+      body {
+        background:
+          radial-gradient(circle at 20% 20%, rgba(111, 78, 246, 0.035) 0 1px, transparent 1px 7px),
+          var(--paper);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        min-height: 100vh;
+      }
+      button, textarea { font: inherit; }
+      .shell { margin: 0 auto; max-width: 1320px; padding: 28px; }
+      .topbar {
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0 22px;
+      }
+      .eyebrow, .mono {
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .live-pill {
+        align-items: center;
+        background: var(--lime);
+        border: 1px solid rgba(23, 21, 31, 0.18);
+        border-radius: 999px;
+        display: flex;
+        gap: 9px;
+        padding: 9px 15px;
+      }
+      .live-dot { background: #54b86a; border-radius: 50%; height: 9px; width: 9px; }
+      .hero {
+        display: grid;
+        gap: 36px;
+        grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.7fr);
+        padding: 54px 0 44px;
+      }
+      h1 {
+        font-size: clamp(3rem, 7vw, 6.6rem);
+        font-weight: 430;
+        letter-spacing: -0.065em;
+        line-height: 0.88;
+        margin: 14px 0 0;
+        max-width: 900px;
+      }
+      .hero-copy { align-self: end; color: var(--muted); font-size: 1.12rem; max-width: 420px; }
+      .telemetry {
+        border: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        margin-bottom: 18px;
+      }
+      .stat { min-height: 112px; padding: 22px; }
+      .stat + .stat { border-left: 1px solid var(--line); }
+      .stat strong { display: block; font-size: 2rem; font-weight: 500; margin-top: 14px; }
+      .workspace { display: grid; gap: 18px; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+      .panel { border: 1px solid var(--line); min-height: 420px; padding: clamp(22px, 4vw, 42px); }
+      .question-panel { background: var(--ink); color: var(--paper-bright); }
+      .panel-number { color: #aaa5b1; float: right; }
+      .question-panel h2, .answer-panel h2 { font-size: 2rem; font-weight: 450; margin: 60px 0 8px; }
+      .panel-intro { color: #aaa5b1; margin: 0 0 30px; }
+      label { display: block; margin-bottom: 10px; }
       textarea {
-        box-sizing: border-box;
-        min-height: 7rem;
-        padding: 0.75rem;
+        background: transparent;
+        border: 0;
+        border-bottom: 1px solid #77727e;
+        color: white;
+        min-height: 115px;
+        outline: none;
+        padding: 14px 0;
+        resize: vertical;
         width: 100%;
       }
-      button {
-        margin-top: 0.75rem;
-        padding: 0.6rem 1rem;
+      textarea:focus { border-bottom-color: var(--lime); }
+      textarea::placeholder { color: #77727e; }
+      .ask-row { align-items: center; display: flex; gap: 14px; justify-content: space-between; margin-top: 24px; }
+      #submit {
+        background: var(--lime);
+        border: 0;
+        border-radius: 999px;
+        color: var(--ink);
+        cursor: pointer;
+        font-weight: 750;
+        min-width: 132px;
+        padding: 14px 22px;
       }
-      #result {
-        border-top: 1px solid #cbd2dc;
-        margin-top: 2rem;
-        padding-top: 1rem;
+      #submit:hover { transform: translateY(-2px); }
+      #submit:disabled { cursor: wait; opacity: 0.65; transform: none; }
+      .suggestions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+      .suggestion {
+        background: transparent;
+        border: 1px solid #4a4651;
+        border-radius: 999px;
+        color: #cbc6d2;
+        cursor: pointer;
+        font-size: 0.78rem;
+        padding: 8px 12px;
       }
-      #error {
-        color: #a31515;
+      .suggestion:hover { border-color: var(--lime); color: var(--lime); }
+      .answer-panel { background: var(--paper-bright); }
+      .answer-empty { color: var(--muted); display: grid; min-height: 260px; place-items: center; text-align: center; }
+      .orb {
+        border: 22px solid rgba(111, 78, 246, 0.09);
+        border-radius: 50%;
+        display: grid;
+        height: 120px;
+        margin: 0 auto 18px;
+        place-items: center;
+        width: 120px;
       }
-      [hidden] {
-        display: none;
+      #answer { font-size: 1.05rem; white-space: pre-wrap; }
+      .result-meta { border-top: 1px solid var(--line); display: flex; justify-content: space-between; margin-top: 28px; padding-top: 16px; }
+      #citations { list-style: none; margin: 10px 0 0; padding: 0; }
+      #citations li { border-top: 1px solid var(--line); color: var(--muted); font-size: 0.84rem; padding: 12px 0; }
+      #loading { color: var(--lime); margin: 0; }
+      #error { background: #ffded8; border: 1px solid #d67565; color: #7c2117; padding: 12px 14px; }
+      [hidden] { display: none !important; }
+      @media (max-width: 820px) {
+        .shell { padding: 18px; }
+        .hero, .workspace { grid-template-columns: 1fr; }
+        .hero { padding: 36px 0 28px; }
+        .hero-copy { align-self: auto; }
+        .telemetry { grid-template-columns: 1fr; }
+        .stat { min-height: auto; }
+        .stat + .stat { border-left: 0; border-top: 1px solid var(--line); }
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Enterprise Knowledge Assistant</h1>
-      <p>Ask a question about the indexed company documents.</p>
-      <form id="chat-form">
-        <label for="question">Question</label>
-        <textarea id="question" name="question" maxlength="2000" required></textarea>
-        <button id="submit" type="submit">Ask</button>
-      </form>
+    <main class="shell">
+      <header class="topbar">
+        <span class="eyebrow">Analytos / Knowledge System</span>
+        <span class="live-pill mono"><span class="live-dot"></span>Azure live</span>
+      </header>
 
-      <p id="loading" role="status" hidden>Searching documents and preparing an answer...</p>
-      <p id="error" role="alert" hidden></p>
+      <section class="hero">
+        <div>
+          <span class="eyebrow">Enterprise intelligence</span>
+          <h1>Ask the company.<br>Get the source.</h1>
+        </div>
+        <p class="hero-copy">Search company policy, pricing, legal, HR, IT, and finance knowledge with answers grounded in the indexed source files.</p>
+      </section>
 
-      <section id="result" hidden aria-live="polite">
-        <h2>Answer</h2>
-        <p id="answer"></p>
-        <p><strong>Retrieved chunks:</strong> <span id="retrieved-count">0</span></p>
-        <h3>Citations</h3>
-        <ul id="citations"></ul>
+      <section class="telemetry" aria-label="System status">
+        <div class="stat"><span class="mono">Documents</span><strong>11</strong></div>
+        <div class="stat"><span class="mono">Search fragments</span><strong>186</strong></div>
+        <div class="stat"><span class="mono">Departments</span><strong>05</strong></div>
+      </section>
+
+      <section class="workspace">
+        <form id="chat-form" class="panel question-panel">
+          <span class="panel-number mono">01</span>
+          <span class="eyebrow">Query console</span>
+          <h2>What do you need to know?</h2>
+          <p class="panel-intro">Ask a focused question about the indexed company documents.</p>
+          <label class="mono" for="question">Your question</label>
+          <textarea id="question" name="question" maxlength="2000" placeholder="What is the expense receipt requirement?" required></textarea>
+          <div class="ask-row">
+            <p id="loading" class="mono" role="status" hidden>Retrieving signals...</p>
+            <span></span>
+            <button id="submit" type="submit">Ask <span aria-hidden="true">→</span></button>
+          </div>
+          <div class="suggestions" aria-label="Example questions">
+            <button class="suggestion" type="button">List indexed documents</button>
+            <button class="suggestion" type="button">What are the password requirements?</button>
+            <button class="suggestion" type="button">Explain the expense approval limits</button>
+          </div>
+        </form>
+
+        <section class="panel answer-panel" aria-live="polite">
+          <span class="panel-number mono">02</span>
+          <span class="eyebrow">Grounded response</span>
+          <div id="answer-empty" class="answer-empty">
+            <div><div class="orb mono">RAG</div><p>Your answer and source trail will appear here.</p></div>
+          </div>
+          <div id="result" hidden>
+            <h2>Answer</h2>
+            <p id="answer"></p>
+            <div class="result-meta"><span class="mono">Retrieved chunks</span><strong id="retrieved-count">0</strong></div>
+            <h3 class="mono">Citations</h3>
+            <ul id="citations"></ul>
+          </div>
+          <p id="error" role="alert" hidden></p>
+        </section>
       </section>
     </main>
 
@@ -65,15 +214,24 @@
       const loading = document.querySelector("#loading");
       const error = document.querySelector("#error");
       const result = document.querySelector("#result");
+      const answerEmpty = document.querySelector("#answer-empty");
       const answer = document.querySelector("#answer");
       const retrievedCount = document.querySelector("#retrieved-count");
       const citations = document.querySelector("#citations");
+
+      for (const suggestion of document.querySelectorAll(".suggestion")) {
+        suggestion.addEventListener("click", () => {
+          question.value = suggestion.textContent.trim();
+          question.focus();
+        });
+      }
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         loading.hidden = false;
         error.hidden = true;
         result.hidden = true;
+        answerEmpty.hidden = false;
         submit.disabled = true;
 
         try {
@@ -113,9 +271,11 @@
             citations.appendChild(item);
           }
           result.hidden = false;
+          answerEmpty.hidden = true;
         } catch (requestError) {
           error.textContent = requestError instanceof Error ? requestError.message : "Request failed.";
           error.hidden = false;
+          answerEmpty.hidden = true;
         } finally {
           loading.hidden = true;
           submit.disabled = false;
