@@ -4,7 +4,7 @@ from collections.abc import Sequence
 
 import pytest
 
-from app.rag.models import RetrievedChunk
+from app.rag.models import IndexedDocument, RetrievedChunk
 from app.rag.service import GREETING_ANSWER, INSUFFICIENT_EVIDENCE_ANSWER, RagService
 
 
@@ -13,9 +13,19 @@ class FakeEmbedder:
         return [[float(len(text))] for text in texts]
 
 
+class UnexpectedEmbedder:
+    def embed(self, texts: Sequence[str]) -> list[list[float]]:
+        raise AssertionError("this deterministic request must not call Azure OpenAI")
+
+
 class FakeSearch:
-    def __init__(self, chunks: list[RetrievedChunk]) -> None:
+    def __init__(
+        self,
+        chunks: list[RetrievedChunk],
+        documents: list[IndexedDocument] | None = None,
+    ) -> None:
         self.chunks = chunks
+        self.documents = documents or []
         self.indexed: tuple[Sequence[RetrievedChunk], Sequence[Sequence[float]]] | None = None
 
     def index(
@@ -33,6 +43,9 @@ class FakeSearch:
         top: int,
     ) -> list[RetrievedChunk]:
         return self.chunks[:top]
+
+    def inventory(self) -> list[IndexedDocument]:
+        return self.documents
 
 
 class FakeGenerator:
@@ -98,10 +111,6 @@ async def test_answer_refuses_without_calling_generation_when_search_is_empty() 
 
 @pytest.mark.asyncio
 async def test_hi_returns_a_deterministic_greeting_without_azure_calls() -> None:
-    class UnexpectedEmbedder:
-        def embed(self, texts: Sequence[str]) -> list[list[float]]:
-            raise AssertionError("a greeting must not call Azure OpenAI")
-
     service = RagService(UnexpectedEmbedder(), FakeSearch([]), FakeGenerator("unused"))
 
     result = await service.answer(question="Hi", top_k=5)
@@ -124,6 +133,72 @@ async def test_nonsense_with_uncited_generation_returns_safe_refusal() -> None:
     assert result.answer == INSUFFICIENT_EVIDENCE_ANSWER
     assert result.citations == ()
     assert result.retrieved_chunks == 1
+
+
+@pytest.mark.asyncio
+async def test_document_inventory_returns_exact_count_and_sorted_sources() -> None:
+    documents = [
+        IndexedDocument("Travel Policy", "Finance/TravelPolicy.docx"),
+        IndexedDocument("Benefits", "HR/Benefits.pdf"),
+    ]
+    service = RagService(UnexpectedEmbedder(), FakeSearch([], documents), FakeGenerator("unused"))
+
+    result = await service.answer(
+        question="what all documents are available in RAG",
+        top_k=5,
+    )
+
+    assert result.answer == (
+        "2 documents are indexed:\n"
+        "- Travel Policy - Finance/TravelPolicy.docx\n"
+        "- Benefits - HR/Benefits.pdf"
+    )
+    assert result.citations == ()
+    assert result.retrieved_chunks == 0
+
+
+@pytest.mark.asyncio
+async def test_document_count_query_returns_only_the_exact_count() -> None:
+    documents = [
+        IndexedDocument("Travel Policy", "Finance/TravelPolicy.docx"),
+        IndexedDocument("Benefits", "HR/Benefits.pdf"),
+    ]
+    service = RagService(UnexpectedEmbedder(), FakeSearch([], documents), FakeGenerator("unused"))
+
+    result = await service.answer(question="total number of documents available", top_k=5)
+
+    assert result.answer == "2 documents are indexed."
+    assert result.citations == ()
+    assert result.retrieved_chunks == 0
+
+
+@pytest.mark.asyncio
+async def test_document_inventory_filters_only_a_department_found_in_paths() -> None:
+    documents = [
+        IndexedDocument("Travel Policy", "KnowledgeBase/Finance/TravelPolicy.docx"),
+        IndexedDocument("Expense Policy", "KnowledgeBase/Finance/ExpensePolicy.pdf"),
+        IndexedDocument("Benefits", "KnowledgeBase/HR/Benefits.pdf"),
+    ]
+    service = RagService(FakeEmbedder(), FakeSearch([], documents), FakeGenerator("unused"))
+
+    result = await service.answer(question="which Finance documents are available", top_k=5)
+
+    assert result.answer == (
+        "2 Finance documents are indexed:\n"
+        "- Expense Policy - KnowledgeBase/Finance/ExpensePolicy.pdf\n"
+        "- Travel Policy - KnowledgeBase/Finance/TravelPolicy.docx"
+    )
+
+
+@pytest.mark.asyncio
+async def test_document_inventory_handles_an_empty_index() -> None:
+    service = RagService(FakeEmbedder(), FakeSearch([]), FakeGenerator("unused"))
+
+    result = await service.answer(question="total number of documents available", top_k=5)
+
+    assert result.answer == "No documents are currently indexed."
+    assert result.citations == ()
+    assert result.retrieved_chunks == 0
 
 
 def test_index_embeds_and_passes_aligned_vectors_to_search() -> None:

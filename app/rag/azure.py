@@ -10,7 +10,7 @@ from azure.search.documents.models import VectorizedQuery
 from openai import AzureOpenAI
 
 from app.config import Settings
-from app.rag.models import RetrievedChunk
+from app.rag.models import IndexedDocument, RetrievedChunk
 
 _COGNITIVE_SERVICES_SCOPE = "https://cognitiveservices.azure.com/.default"
 
@@ -163,6 +163,29 @@ class AzureSearchAdapter:
             top=top,
         )
         return [self._to_chunk(cast("dict[str, Any]", result)) for result in results]
+
+    def inventory(self) -> list[IndexedDocument]:
+        """Return distinct indexed sources for this assignment-sized index."""
+
+        results = self._client.search(
+            search_text="*",
+            select=["title", "source_path"],
+            top=1000,
+        )
+        documents_by_path: dict[str, IndexedDocument] = {}
+        for raw_result in results:
+            result = cast("dict[str, Any]", raw_result)
+            source_path = str(result["source_path"]).replace("\\", "/")
+            key = source_path.casefold()
+            if key not in documents_by_path:
+                documents_by_path[key] = IndexedDocument(
+                    title=str(result["title"]),
+                    source_path=source_path,
+                )
+        return sorted(
+            documents_by_path.values(),
+            key=lambda document: document.source_path.casefold(),
+        )
 
     @staticmethod
     def _to_chunk(result: dict[str, Any]) -> RetrievedChunk:

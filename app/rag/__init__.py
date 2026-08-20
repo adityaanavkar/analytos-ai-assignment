@@ -6,7 +6,7 @@ from azure.identity import DefaultAzureCredential
 
 from app.config import get_settings
 from app.rag.azure import AzureOpenAIAdapter, AzureSearchAdapter
-from app.rag.models import ChatResult, Citation, RagAnswer, RetrievedChunk
+from app.rag.models import ChatResult, Citation, IndexedDocument, RagAnswer, RetrievedChunk
 from app.rag.service import RagService
 
 
@@ -28,6 +28,7 @@ build_chat_service = get_rag_service
 __all__ = [
     "ChatResult",
     "Citation",
+    "IndexedDocument",
     "RagAnswer",
     "RagService",
     "RetrievedChunk",

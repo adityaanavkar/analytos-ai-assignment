@@ -68,6 +68,18 @@ Rules for every action:
 - **How fixed:** Exact greetings now bypass retrieval, unsupported or uncited answers return a deterministic insufficient-evidence response, unexpected provider failures become sanitized JSON, and the browser handles non-JSON responses defensively.
 - **Regression evidence:** Live HTTP requests for `Hi`, `whjat`, and a supported Expense Policy question all returned JSON HTTP 200 responses; the supported question retained its verified page citation, and the full regression suite passed 40 tests.
 
+## Complete-corpus ingestion and inventory checkpoint
+
+- **Completed:** 2026-08-21.
+- **What:** Added structure-preserving DOCX and XLSX ingestion, retained the existing PDF path, reconciled all 11 supplied documents into the live improved index as 186 chunks, and added deterministic document inventory queries.
+- **How:** The unified `scripts.ingest_all` command discovers supported files, preserves format-specific provenance, generates 1,536-dimensional embeddings in batches, upserts stable chunk IDs, and removes stale IDs only from the dedicated assignment index.
+- **Why:** One repeatable all-format command prevents partial manual ingestion and lets inventory questions use actual index metadata rather than unreliable language-model inference.
+- **Evidence:** Two consecutive live uploads finished with 11 documents, 186 chunks, zero failed uploads, and zero stale chunks; the live index reported 11 distinct source paths and 186 total chunks.
+- **Evidence:** Live chat returned `11 documents are indexed.`, listed all 11 documents, and returned exactly the two Finance documents for a department-specific inventory query.
+- **Evidence:** DOCX password-policy and XLSX sales-discount questions returned HTTP 200 with citations to the correct source format, and all 63 automated tests passed.
+- **Deviations/follow-up:** A4 remains in progress because Azure Blob input unification, bounded concurrency, retry/backoff, and richer canonical metadata are not complete.
+- **Deviations/follow-up:** Retrieval quality for broad table and multi-row questions will be improved under A6 rather than blocking complete-corpus availability.
+
 ## Fixed implementation decisions
 
 - Use Python, FastAPI, Pydantic, and direct Azure/OpenAI SDKs rather than
@@ -192,7 +204,7 @@ Acceptance checks:
 - Tests prove deterministic IDs, serialization, provenance, ACL metadata, and
   current-versus-historical classification.
 
-Journal: **Status:** Pending. **What/How/Why/Evidence/Deviations:** TBD.
+Journal: **Status:** In progress. The MVP schema now has deterministic IDs, content, vectors, titles, source paths, PDF pages, Word sections, and Excel sheet/row sections. Department, document type, versions, effective dates, current-version policy, and allowed-group metadata remain for the full A3 acceptance criteria.
 
 ### A4 - PDF, DOCX, XLSX, and Blob ingestion
 
@@ -207,7 +219,7 @@ Acceptance checks:
 - All 11 supplied files ingest successfully and a second run creates no
   unintended duplicates.
 
-Journal: **Status:** Pending. **What/How/Why/Evidence/Deviations:** TBD.
+Journal: **Status:** In progress. All 11 local files now ingest successfully through one dry-run/live command, and a second upload proved stable 186-chunk reconciliation without duplicates. Azure Blob input unification, bounded concurrency, retry/backoff, and partial-error reporting remain before A4 is complete.
 
 ### A5 - Frozen baseline vector-only RAG
 

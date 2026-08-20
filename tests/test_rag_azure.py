@@ -7,7 +7,7 @@ from unittest.mock import Mock
 import pytest
 
 from app.rag.azure import AzureOpenAIAdapter, AzureSearchAdapter
-from app.rag.models import RetrievedChunk
+from app.rag.models import IndexedDocument, RetrievedChunk
 
 
 def test_openai_adapter_preserves_embedding_input_order() -> None:
@@ -93,3 +93,25 @@ def test_search_adapter_maps_hybrid_results(monkeypatch: pytest.MonkeyPatch) -> 
     search_kwargs: dict[str, Any] = client.search.call_args.kwargs
     assert search_kwargs["search_text"] == "pricing"
     assert search_kwargs["top"] == 5
+
+
+def test_search_inventory_deduplicates_chunks_and_normalizes_paths() -> None:
+    client = Mock()
+    client.search.return_value = [
+        {"title": "Travel Policy", "source_path": "Finance\\TravelPolicy.docx"},
+        {"title": "Travel Policy", "source_path": "Finance/TravelPolicy.docx"},
+        {"title": "Benefits", "source_path": "HR/Benefits.pdf"},
+    ]
+    adapter = AzureSearchAdapter(client)
+
+    documents = adapter.inventory()
+
+    assert documents == [
+        IndexedDocument("Travel Policy", "Finance/TravelPolicy.docx"),
+        IndexedDocument("Benefits", "HR/Benefits.pdf"),
+    ]
+    client.search.assert_called_once_with(
+        search_text="*",
+        select=["title", "source_path"],
+        top=1000,
+    )

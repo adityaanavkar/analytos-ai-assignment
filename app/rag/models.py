@@ -17,6 +17,14 @@ class RetrievedChunk:
 
 
 @dataclass(frozen=True, slots=True)
+class IndexedDocument:
+    """One distinct source represented in the search index."""
+
+    title: str
+    source_path: str
+
+
+@dataclass(frozen=True, slots=True)
 class Citation:
     """A verified citation resolved from a retrieved chunk."""
 

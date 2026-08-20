@@ -19,18 +19,17 @@ an improved pipeline so that quality gains can be measured rather than assumed.
 
 ## Current status
 
-The local project foundation is **complete**. It currently includes:
+The first live end-to-end version is running.
 
-- A Python virtual environment and separated runtime/development dependencies.
-- Typed environment configuration with safe defaults.
-- A minimal FastAPI application with a working `GET /health` endpoint.
-- Five configuration/health tests plus Ruff, mypy, and pytest configuration.
-- The 11 supplied source documents under `KnowledgeBase/`.
-- Placeholder directories for ingestion, evaluation, infrastructure, and
-  architecture artifacts.
+- Azure OpenAI, Azure AI Search Basic, Blob Storage, and monitoring are deployed through Bicep.
+- All 11 supplied PDF, DOCX, and XLSX documents are indexed as 186 deterministic chunks.
+- PDF page, Word heading/table, and Excel sheet/row/header provenance is preserved for citations.
+- The FastAPI service and browser UI answer questions through hybrid retrieval and grounded generation.
+- Document list, exact count, and department inventory questions use Search metadata instead of model inference.
+- Greetings, unsupported questions, citation validation, and JSON error handling have regression coverage.
+- The current quality suite contains 63 passing tests plus Ruff, formatting, strict mypy, Bicep, and dependency checks.
 
-Document ingestion, Azure infrastructure, search indexes, RAG answering, the
-browser UI, and evaluation results are **not implemented yet**.
+The baseline comparison, advanced query analysis, retrieval-time access control, formal evaluation, production architecture, and submission package remain to be implemented.
 
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the live checklist,
 acceptance evidence, and engineering decision journal. That tracker must be
@@ -80,9 +79,9 @@ Copy the safe example file:
 Copy-Item .env.example .env
 ```
 
-The current health endpoint works without Azure values. Do not commit `.env`,
-API keys, access tokens, or connection strings; Git is configured to ignore
-them.
+The health endpoint works without Azure values.
+Live ingestion and chat require the deployed service endpoints in `.env` plus an authenticated Azure CLI session.
+Do not commit `.env`, API keys, access tokens, or connection strings because Git is configured to ignore them.
 
 ## Run the current application
 
@@ -92,7 +91,8 @@ With the virtual environment active, start the API:
 python -m uvicorn app.main:app --reload
 ```
 
-Open <http://127.0.0.1:8000/health>. The expected response is:
+Open <http://127.0.0.1:8000> for the browser assistant.
+Open <http://127.0.0.1:8000/health> for the health response:
 
 ```json
 {
@@ -105,6 +105,22 @@ Open <http://127.0.0.1:8000/health>. The expected response is:
 FastAPI's interactive API documentation is available at
 <http://127.0.0.1:8000/docs>. Stop the server with `Ctrl+C`.
 
+## Prepare or upload all documents
+
+Preview every parser and chunk count without contacting Azure:
+
+```powershell
+python -m scripts.ingest_all
+```
+
+Reconcile the dedicated Azure Search index only after reviewing `.env` and the dry run:
+
+```powershell
+python -m scripts.ingest_all --upload
+```
+
+The upload uses deterministic IDs, batches embeddings, upserts the full corpus, and removes stale chunks only from the dedicated assignment index.
+
 ## Run tests and quality checks
 
 Run these commands from the repository root while the virtual environment is
@@ -113,12 +129,12 @@ active:
 ```powershell
 python -m pytest
 python -m ruff check .
-python -m mypy app ingestion evaluation
+python -m ruff format --check .
+python -m mypy app ingestion scripts tests
 python -m pip check
 ```
 
-At this stage, pytest checks the health endpoint. The quality gates will expand
-as ingestion, retrieval, security, and evaluation features are added.
+The suite currently checks all three real document formats, complete-corpus discovery, inventory behavior, RAG orchestration, Azure adapter boundaries, chat error handling, and the browser/API contract without making live Azure calls.
 
 ## Planned architecture
 
