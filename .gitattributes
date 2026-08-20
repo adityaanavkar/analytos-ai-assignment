@@ -1,0 +1,14 @@
+# Normalize source and documentation text across platforms.
+* text=auto
+*.md text eol=lf
+*.txt text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Preserve knowledge-base documents byte-for-byte.
+*.pdf binary
+*.docx binary
+*.xlsx binary

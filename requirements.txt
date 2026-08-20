@@ -1,0 +1,26 @@
+# Runtime: Python 3.14+
+#
+# Direct dependencies only. Generate an exact environment snapshot with:
+#   python -m pip freeze --exclude-editable > requirements-lock.txt
+
+# API and configuration
+fastapi>=0.120,<1
+uvicorn[standard]>=0.38,<1
+pydantic-settings>=2.10,<3
+
+# Azure RAG stack
+openai>=2.0,<3
+azure-identity>=1.25,<2
+azure-search-documents>=11.6,<12
+azure-storage-blob>=12.26,<13
+azure-monitor-opentelemetry>=1.8,<2
+
+# Enterprise document parsing
+pypdf>=6,<7
+python-docx>=1.2,<2
+openpyxl>=3.1,<4
+
+# Resilience and HTTP integration
+tenacity>=9,<10
+httpx>=0.28,<1
+

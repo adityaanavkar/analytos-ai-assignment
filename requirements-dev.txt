@@ -1,0 +1,10 @@
+-r requirements.txt
+
+# Tests and evaluation harness
+pytest>=8,<10
+pytest-asyncio>=1,<2
+pytest-cov>=6,<8
+
+# Static quality gates
+ruff>=0.14,<1
+mypy>=1.18,<2
