@@ -64,6 +64,9 @@ Rules for every action:
 - **Evidence:** The live API returned HTTP 200 for an Expense Policy question, retrieved four chunks, answered the 30-day and 60-day submission rules correctly, and cited the source PDF page 1.
 - **Deviations/follow-up:** The MVP currently covers one PDF, one improved index, fixed-size chunks, and a minimal UI.
 - **Deviations/follow-up:** It does not yet satisfy the full A3-A10 acceptance criteria for all formats, metadata, baseline comparison, query analysis, ACLs, evidence calibration, diagnostics, or evaluation.
+- **Regression fixed:** The first live MVP returned a plain-text HTTP 500 for greetings and unsupported input because uncited model output raised an unhandled citation-validation exception.
+- **How fixed:** Exact greetings now bypass retrieval, unsupported or uncited answers return a deterministic insufficient-evidence response, unexpected provider failures become sanitized JSON, and the browser handles non-JSON responses defensively.
+- **Regression evidence:** Live HTTP requests for `Hi`, `whjat`, and a supported Expense Policy question all returned JSON HTTP 200 responses; the supported question retained its verified page citation, and the full regression suite passed 40 tests.
 
 ## Fixed implementation decisions
 

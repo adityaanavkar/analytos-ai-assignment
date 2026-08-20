@@ -82,9 +82,18 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question: question.value, top_k: 5 }),
           });
-          const payload = await response.json();
+          const contentType = response.headers.get("content-type") || "";
+          const payload = contentType.includes("application/json")
+            ? await response.json().catch(() => null)
+            : null;
           if (!response.ok) {
-            throw new Error(typeof payload.detail === "string" ? payload.detail : "Request failed.");
+            const detail = payload && typeof payload.detail === "string"
+              ? payload.detail
+              : `The server could not complete the request (${response.status}).`;
+            throw new Error(detail);
+          }
+          if (!payload || typeof payload.answer !== "string" || !Array.isArray(payload.citations)) {
+            throw new Error("The server returned an invalid response.");
           }
 
           answer.textContent = payload.answer;

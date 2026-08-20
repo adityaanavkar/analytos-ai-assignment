@@ -8,6 +8,15 @@ from typing import Protocol
 from app.rag.models import ChatResult, Citation, RetrievedChunk
 
 _CITATION_PATTERN = re.compile(r"\[([^\[\]\s]+)\]")
+_GREETING_PATTERN = re.compile(
+    r"^(?:hi|hello|hey|good\s+(?:morning|afternoon|evening))(?:\s+there)?[!.,?\s]*$",
+    re.IGNORECASE,
+)
+
+GREETING_ANSWER = "Hi! Ask me a question about the company knowledge base."
+INSUFFICIENT_EVIDENCE_ANSWER = (
+    "I could not find enough supporting information in the knowledge base to answer that."
+)
 
 
 class Embedder(Protocol):
@@ -71,6 +80,8 @@ class RagService:
             raise ValueError("question must not be empty")
         if not 1 <= top_k <= 20:
             raise ValueError("top_k must be between 1 and 20")
+        if _GREETING_PATTERN.fullmatch(normalized_question):
+            return ChatResult(answer=GREETING_ANSWER, citations=(), retrieved_chunks=0)
 
         query_vectors = await asyncio.to_thread(self._embedder.embed, [normalized_question])
         if len(query_vectors) != 1:
@@ -84,28 +95,33 @@ class RagService:
         )
         if not chunks:
             return ChatResult(
-                answer="I could not find supporting information in the knowledge base.",
+                answer=INSUFFICIENT_EVIDENCE_ANSWER,
                 citations=(),
                 retrieved_chunks=0,
             )
 
         answer = await asyncio.to_thread(self._generator.generate, normalized_question, chunks)
         citations = self._resolve_citations(answer, chunks)
+        if not citations:
+            return ChatResult(
+                answer=INSUFFICIENT_EVIDENCE_ANSWER,
+                citations=(),
+                retrieved_chunks=len(chunks),
+            )
         return ChatResult(answer=answer, citations=citations, retrieved_chunks=len(chunks))
 
     @staticmethod
     def _resolve_citations(
         answer: str,
         chunks: Sequence[RetrievedChunk],
-    ) -> tuple[Citation, ...]:
+    ) -> tuple[Citation, ...] | None:
         chunks_by_id = {chunk.id: chunk for chunk in chunks}
         cited_ids = list(dict.fromkeys(_CITATION_PATTERN.findall(answer)))
         unknown_ids = [chunk_id for chunk_id in cited_ids if chunk_id not in chunks_by_id]
         if unknown_ids:
-            joined = ", ".join(unknown_ids)
-            raise ValueError(f"answer contains citations that were not retrieved: {joined}")
+            return None
         if not cited_ids:
-            raise ValueError("grounded answer must cite at least one retrieved chunk")
+            return None
 
         return tuple(
             Citation(

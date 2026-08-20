@@ -114,7 +114,13 @@ def create_app(chat_service_factory: ChatServiceFactory = _load_chat_service) ->
         request: ChatRequest,
         chat_service: Annotated[ChatService, Depends(resolve_chat_service)],
     ) -> ChatResponse:
-        return await chat_service.answer(question=request.question, top_k=request.top_k)
+        try:
+            return await chat_service.answer(question=request.question, top_k=request.top_k)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="The chat service could not complete the request.",
+            ) from exc
 
     return application
 

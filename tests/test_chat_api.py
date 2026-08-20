@@ -28,6 +28,13 @@ class StubChatService:
         )
 
 
+class FailingChatService:
+    """Provider failure containing a detail that must not reach API clients."""
+
+    async def answer(self, *, question: str, top_k: int) -> ChatResponse:
+        raise ConnectionError(f"private provider detail for {question} at top_k={top_k}")
+
+
 @pytest.mark.asyncio
 async def test_chat_endpoint_returns_grounded_answer() -> None:
     service = StubChatService()
@@ -94,3 +101,20 @@ async def test_chat_endpoint_reports_unavailable_service() -> None:
 
     assert response.status_code == 503
     assert response.json() == {"detail": "The chat service is not available."}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("question", ["Hi", "whjat"])
+async def test_chat_endpoint_sanitizes_unexpected_rag_failure(question: str) -> None:
+    application = create_app(chat_service_factory=FailingChatService)
+
+    async with AsyncClient(
+        transport=ASGITransport(app=application, raise_app_exceptions=False),
+        base_url="http://test",
+    ) as client:
+        response = await client.post("/chat", json={"question": question})
+
+    assert response.status_code == 502
+    assert response.headers["content-type"].startswith("application/json")
+    assert response.json() == {"detail": "The chat service could not complete the request."}
+    assert "private provider detail" not in response.text

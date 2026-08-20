@@ -5,7 +5,7 @@ from collections.abc import Sequence
 import pytest
 
 from app.rag.models import RetrievedChunk
-from app.rag.service import RagService
+from app.rag.service import GREETING_ANSWER, INSUFFICIENT_EVIDENCE_ANSWER, RagService
 
 
 class FakeEmbedder:
@@ -71,15 +71,18 @@ async def test_answer_returns_only_verified_citations() -> None:
 
 
 @pytest.mark.asyncio
-async def test_answer_rejects_a_citation_not_present_in_retrieval() -> None:
+async def test_answer_replaces_a_fabricated_citation_with_safe_refusal() -> None:
     service = RagService(
         FakeEmbedder(),
         FakeSearch([_chunk()]),
         FakeGenerator("Support is included [invented-chunk]."),
     )
 
-    with pytest.raises(ValueError, match="were not retrieved"):
-        await service.answer(question="Is support included?", top_k=5)
+    result = await service.answer(question="Is support included?", top_k=5)
+
+    assert result.answer == INSUFFICIENT_EVIDENCE_ANSWER
+    assert result.citations == ()
+    assert result.retrieved_chunks == 1
 
 
 @pytest.mark.asyncio
@@ -90,7 +93,37 @@ async def test_answer_refuses_without_calling_generation_when_search_is_empty() 
 
     assert result.citations == ()
     assert result.retrieved_chunks == 0
-    assert "could not find" in result.answer
+    assert result.answer == INSUFFICIENT_EVIDENCE_ANSWER
+
+
+@pytest.mark.asyncio
+async def test_hi_returns_a_deterministic_greeting_without_azure_calls() -> None:
+    class UnexpectedEmbedder:
+        def embed(self, texts: Sequence[str]) -> list[list[float]]:
+            raise AssertionError("a greeting must not call Azure OpenAI")
+
+    service = RagService(UnexpectedEmbedder(), FakeSearch([]), FakeGenerator("unused"))
+
+    result = await service.answer(question="Hi", top_k=5)
+
+    assert result.answer == GREETING_ANSWER
+    assert result.citations == ()
+    assert result.retrieved_chunks == 0
+
+
+@pytest.mark.asyncio
+async def test_nonsense_with_uncited_generation_returns_safe_refusal() -> None:
+    service = RagService(
+        FakeEmbedder(),
+        FakeSearch([_chunk()]),
+        FakeGenerator("I cannot answer that from the supplied evidence."),
+    )
+
+    result = await service.answer(question="whjat", top_k=5)
+
+    assert result.answer == INSUFFICIENT_EVIDENCE_ANSWER
+    assert result.citations == ()
+    assert result.retrieved_chunks == 1
 
 
 def test_index_embeds_and_passes_aligned_vectors_to_search() -> None:
