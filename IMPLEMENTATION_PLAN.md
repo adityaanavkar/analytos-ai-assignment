@@ -41,19 +41,29 @@ Rules for every action:
 |---|---|---|---|---|
 | P0 | Local environment and source-document validation | Complete | - | Python environment validated; 11 source documents parsed |
 | A1 | Repository, tracker, and local application foundation | Complete | P0 | Clean Git state, health endpoint, configuration tests, Ruff, mypy, pytest |
-| A2 | Azure preflight, budget guardrails, and reproducible infrastructure | Pending | A1 | Active subscription, capability/quota report, reviewed Bicep deployment outputs |
-| A3 | Canonical document/chunk schema and metadata policy | Pending | A1 | Typed schemas and version/ACL/provenance tests |
-| A4 | PDF, DOCX, XLSX, and Blob ingestion | Pending | A2, A3 | All 11 files ingested without silent loss; dry-run and idempotency evidence |
+| A2 | Azure preflight, budget guardrails, and reproducible infrastructure | Complete | A1 | Active subscription, capability/quota report, reviewed Bicep deployment outputs |
+| A3 | Canonical document/chunk schema and metadata policy | In progress | A1 | Typed schemas and version/ACL/provenance tests |
+| A4 | PDF, DOCX, XLSX, and Blob ingestion | In progress | A2, A3 | All 11 files ingested without silent loss; dry-run and idempotency evidence |
 | A5 | Frozen baseline vector-only RAG | Pending | A2, A4 | Separate baseline index/config and immutable baseline results |
-| A6 | Structure-aware chunking and hybrid retrieval | Pending | A5 | Improved index plus wrong-chunk and multi-section retrieval evidence |
+| A6 | Structure-aware chunking and hybrid retrieval | In progress | A5 | Improved index plus wrong-chunk and multi-section retrieval evidence |
 | A7 | Query analysis, decomposition, and conversation context | Pending | A6 | Ambiguous, comparison, historical, and follow-up tests |
-| A8 | Evidence sufficiency, grounded generation, and citation validation | Pending | A6, A7 | No-answer, grounding, and citation-tampering tests |
+| A8 | Evidence sufficiency, grounded generation, and citation validation | In progress | A6, A7 | No-answer, grounding, and citation-tampering tests |
 | A9 | Retrieval-time department access control | Pending | A6 | Positive and negative cross-department security tests |
-| A10 | Chat API and lightweight browser UI | Pending | A7, A8, A9 | Working local demo with citations, clarification, ACLs, and diagnostics |
+| A10 | Chat API and lightweight browser UI | In progress | A7, A8, A9 | Working local demo with citations, clarification, ACLs, and diagnostics |
 | A11 | Frozen evaluation set and baseline/improved comparison | Pending | A5-A10 | Reproducible raw and summary reports with measured metrics |
 | A12 | Observability, latency, tokens, and cost reporting | Pending | A10, A11 | Stage traces, safe telemetry, and dated cost calculation |
 | A13 | Production architecture and six problem-solving answers | Pending | A2-A12 | Exported diagram and reviewer-ready technical documentation |
 | A14 | Final verification, video script, and submission package | Pending | A13 | Clean verification run and complete submission checklist |
+
+## First end-to-end MVP checkpoint
+
+- **Completed:** 2026-08-21.
+- **What:** Deployed the first live Azure stack, extracted and chunked `KnowledgeBase/Finance/ExpensePolicy.pdf`, created the improved Search index, uploaded four embedded chunks, and exposed a browser-backed `POST /chat` flow.
+- **How:** The application uses `DefaultAzureCredential`, `text-embedding-3-small`, hybrid Azure AI Search retrieval, and `gpt-4.1-mini` grounded generation with application-validated chunk citations.
+- **Why:** A thin working vertical slice validates the riskiest integration boundaries early and provides a demonstrable base for incremental ingestion, retrieval, security, and evaluation improvements.
+- **Evidence:** The live API returned HTTP 200 for an Expense Policy question, retrieved four chunks, answered the 30-day and 60-day submission rules correctly, and cited the source PDF page 1.
+- **Deviations/follow-up:** The MVP currently covers one PDF, one improved index, fixed-size chunks, and a minimal UI.
+- **Deviations/follow-up:** It does not yet satisfy the full A3-A10 acceptance criteria for all formats, metadata, baseline comparison, query analysis, ACLs, evidence calibration, diagnostics, or evaluation.
 
 ## Fixed implementation decisions
 
@@ -159,7 +169,15 @@ Acceptance checks:
   names/endpoints/deployments; no secret is written to Git.
 - The deployment creates only approved demo resources and documents teardown.
 
-Journal: **Status:** Pending. **What/How/Why/Evidence/Deviations:** TBD.
+Journal:
+
+- **Completed:** 2026-08-21.
+- **What:** Registered required providers and deployed Azure OpenAI, Azure AI Search Basic, Blob Storage, Log Analytics, Application Insights, model deployments, and least-privilege data-plane role assignments through Bicep.
+- **How:** Subscription-specific discovery verified model availability and quota before deployment, Bicep `what-if` previewed 13 intended changes, and sanitized deployment outputs supplied only service names and endpoints to the ignored local `.env`.
+- **Why:** Reproducible infrastructure and Entra authentication avoid manual drift and committed secrets while keeping the local MVP easy to run.
+- **Evidence:** Deployment `analytos-ai-demo` succeeded in `rg-analytos-ai-demo`; the live embedding call returned 1,536 dimensions and the live grounded chat smoke test returned the required citation.
+- **Deviations/follow-up:** East US 2 lacked new Search Basic capacity, so Search was placed in Central India while Azure OpenAI and monitoring remained in East US 2.
+- **Deviations/follow-up:** The first OpenAI deployment attempt exposed concurrent child-deployment conflicts and the first Search definition combined incompatible authentication properties; the Bicep was corrected and redeployed incrementally.
 
 ### A3 - Canonical document/chunk schema and metadata policy
 

@@ -17,3 +17,9 @@ These are common instructions for Kun's agents across all scenarios.
   If something clearly looks off, even if it is not directly related to what you are doing, try to get it fixed along
 * Apply that same high standard to engineering excellence: lint, test failures, and test flakiness.
   If you see one, even if it is not caused by what you are working on right now, still get it fixed.
+
+## Assignment delivery priority
+
+* Prioritize getting a thin, demonstrable, end-to-end version running before hardening individual components.
+* Do not block the first working RAG flow on production-grade infrastructure, exhaustive abstractions, comprehensive evaluation, or pixel-perfect UI.
+* After the first end-to-end flow works, improve quality, security, evaluation, observability, and documentation iteratively.
