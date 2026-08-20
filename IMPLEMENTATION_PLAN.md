@@ -247,7 +247,7 @@ Acceptance checks:
   retrieval of all evidence needed across multiple sections/documents.
 - Semantic-ranker unavailability has a tested hybrid-only fallback.
 
-Journal: **Status:** Pending. **What/How/Why/Evidence/Deviations:** TBD.
+Journal: **Status:** In progress. Structure-aware DOCX blocks and tables, XLSX rows and headers, PDF page provenance, and live hybrid keyword/vector retrieval are implemented. The specified Top-20 fusion, semantic reranking, deduplication, diversity policy, wrong-chunk comparison evidence, and tested semantic fallback remain incomplete.
 
 ### A7 - Query analysis, decomposition, and conversation context
 
@@ -274,7 +274,7 @@ Acceptance checks:
 - Tests cover missing information, conflicting sources, malformed output,
   citation tampering, and a valid-looking but incorrectly mapped citation.
 
-Journal: **Status:** Pending. **What/How/Why/Evidence/Deviations:** TBD.
+Journal: **Status:** In progress. Generation is restricted to retrieved chunks, valid chunk IDs resolve to source metadata, fabricated or uncited answers fail safely, and missing evidence produces a deterministic refusal. A calibrated evidence threshold plus the complete conflict, malformed-output, tampering, and incorrect-mapping evaluation set remain incomplete.
 
 ### A9 - Retrieval-time department access control
 
@@ -303,7 +303,7 @@ Acceptance checks:
 - Azure dependency failures, timeouts, malformed input, and empty retrieval are
   handled and covered by tests.
 
-Journal: **Status:** Pending. **What/How/Why/Evidence/Deviations:** TBD.
+Journal: **Status:** In progress. The local demo has typed health and chat endpoints, a responsive multi-turn browser experience, safe errors, retrieved counts, and collapsible citations. Backend conversation history, group selection and ACL enforcement, clarification, baseline/improved modes, confidence, timings, diagnostics, and the evaluation endpoint remain incomplete.
 
 ### A11 - Frozen evaluation set and baseline/improved comparison
 

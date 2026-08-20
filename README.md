@@ -36,6 +36,8 @@ acceptance evidence, and engineering decision journal. That tracker must be
 updated whenever an action is completed, including what was done, how it was
 verified, and why the approach was chosen.
 
+See [VERSIONS.md](VERSIONS.md) for the chronological record of what each working version achieved, how it was verified, what behaved poorly, and what the next version should address.
+
 ## Beginner setup
 
 These commands use PowerShell on Windows. Start from the repository folder:
