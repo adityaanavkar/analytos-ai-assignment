@@ -193,7 +193,6 @@ Use these reviewer-facing architecture artifacts:
 - [Editable SVG](architecture/production-azure-rag.svg)
 - [Mermaid source](architecture/production-azure-rag.mmd)
 - [Architecture explanation](architecture/production-architecture.md)
-- [Spoken presentation talk track](architecture/diagram-presentation-talk-track.md)
 
 ## Architecture decisions
 
@@ -301,8 +300,6 @@ Use these questions during the video:
 The first two demonstrate grounded retrieval and readable citations.
 
 The third demonstrates the deterministic insufficient-evidence refusal without fabricated citations.
-
-Use the [architecture talk track](architecture/diagram-presentation-talk-track.md) while presenting the production diagram.
 
 ## Architecture and problem-solving answers
 

@@ -2,7 +2,7 @@
 
 ![Production Azure RAG architecture](production-azure-rag.svg)
 
-## How to present the diagram
+## Architecture flow
 
 1. An employee signs in through Microsoft Entra ID, which supplies department and group claims.
 2. Azure App Service hosts the FastAPI application and performs query analysis, retrieval orchestration, evidence checks, and citation validation.
