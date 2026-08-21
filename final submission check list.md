@@ -33,10 +33,14 @@ Home-screen regression result: All four built-in prompts now return grounded ans
 
 ## 35-40 minutes: GitHub
 
-- [ ] Confirm that `.env`, credentials, and secrets are not tracked.
-- [ ] Review `git status`.
-- [ ] Commit and push the final repository.
+- [x] Confirm that `.env`, credentials, and secrets are not tracked.
+- [x] Review `git status`.
+- [x] Commit and push the final repository.
 - [ ] Confirm that the GitHub repository link opens correctly.
+
+Git result: `main` was pushed to `origin` at commit `7bd323b`.
+
+Access result: The unauthenticated GitHub URL currently returns HTTP 404, so repository visibility or reviewer access must be changed manually before submission.
 
 ## 40-55 minutes: Video
 
