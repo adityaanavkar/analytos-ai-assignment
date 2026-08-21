@@ -24,7 +24,7 @@ The accepted improved pipeline scored **154/160 (96.25%)**, an increase of **14 
 | Mean live latency | 3,927.51 ms | 3,650.23 ms | 277.28 ms faster |
 | Observed p95 latency | 6,596.61 ms | 6,061.73 ms | 534.88 ms faster |
 
-The retrieval measurements are source-level proxies over the eight answerable, non-inventory cases with candidate traces.
+The retrieval measurements are source-level proxies calculated from candidate source paths in the trace-complete A5 baseline artifact and the accepted v0.7 improved artifact across the eight answerable, non-inventory cases.
 
 They do not replace claim-level semantic relevance review.
 
@@ -109,6 +109,7 @@ Run the reproducible evaluation with:
 - [Evaluation protocol](README.md)
 - [Baseline and first-improved raw comparison](results/core_v1_baseline_vs_improved_v0_6.json)
 - [Baseline manual judgment](results/core_v1_baseline_vs_improved_v0_6_judgment.json)
+- [Trace-complete baseline and improved run](results/core_v1_a5_trace_complete_unscored.json)
 - [Accepted improved raw answers and traces](results/core_v1_improved_v0_7_accepted_unscored.json)
 - [Accepted improved manual judgment](results/core_v1_improved_v0_7_accepted_judgment.json)
 

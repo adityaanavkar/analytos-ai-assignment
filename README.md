@@ -254,6 +254,7 @@ Evaluation evidence:
 - [Frozen dataset](evaluation/datasets/core_v1.json)
 - [Frozen baseline and v0.6 raw comparison](evaluation/results/core_v1_baseline_vs_improved_v0_6.json)
 - [Frozen baseline manual judgment](evaluation/results/core_v1_baseline_vs_improved_v0_6_judgment.json)
+- [Trace-complete baseline and improved run](evaluation/results/core_v1_a5_trace_complete_unscored.json)
 - [Accepted improved v0.7 raw output and traces](evaluation/results/core_v1_improved_v0_7_accepted_unscored.json)
 - [Accepted improved v0.7 manual judgment](evaluation/results/core_v1_improved_v0_7_accepted_judgment.json)
 - [Chronological version record](VERSIONS.md)
