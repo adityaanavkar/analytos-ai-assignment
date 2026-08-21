@@ -4,7 +4,9 @@ from pathlib import Path
 import pytest
 
 from app.rag.models import ChatResult, Citation
+from app.rag.trace import RequestTrace, StageLatency
 from evaluation.runner import evaluate_pipeline, load_frozen_dataset
+from evaluation.usage_cost import build_usage_cost_evidence
 
 
 class FakeService:
@@ -14,6 +16,23 @@ class FakeService:
             answer=f"Grounded answer to {question}",
             citations=(Citation(chunk_id="chunk-1", source="KnowledgeBase/Test.pdf"),),
             retrieved_chunks=5,
+        )
+
+    def get_last_trace(self) -> RequestTrace:
+        return RequestTrace(
+            question="What is documented?",
+            embedding_deployment="embedding-deployment",
+            generation_deployment="chat-deployment",
+            candidates=(),
+            generation_output="Grounded answer",
+            stage_latency=StageLatency(1.0, 2.0, 3.0, 6.0),
+            usage_cost=build_usage_cost_evidence(
+                embedding_inputs=["What is documented?"],
+                chat_inputs=["Grounded input"],
+                chat_output="Grounded answer",
+                embedding_model="text-embedding-3-small",
+                chat_model="gpt-4.1-mini",
+            ),
         )
 
 
@@ -40,5 +59,8 @@ async def test_evaluation_captures_full_output_without_inventing_scores() -> Non
     assert output["citations"][0]["chunk_id"] == "chunk-1"
     assert output["retrieved_chunks"] == 5
     assert output["latency_ms"] >= 0
+    assert output["request_trace"]["embedding_deployment"] == "embedding-deployment"
+    assert output["request_trace"]["stage_latency"]["retrieval_ms"] == 2.0
+    assert output["request_trace"]["usage_cost"]["usage"]["total_tokens"] > 0
     assert set(output["manual_judgment"].values()) == {None}
     json.dumps(pipeline)

@@ -42,17 +42,17 @@ Rules for every action:
 | P0 | Local environment and source-document validation | Complete | - | Python environment validated; 11 source documents parsed |
 | A1 | Repository, tracker, and local application foundation | Complete | P0 | Clean Git state, health endpoint, configuration tests, Ruff, mypy, pytest |
 | A2 | Azure preflight, budget guardrails, and reproducible infrastructure | Complete | A1 | Active subscription, capability/quota report, reviewed Bicep deployment outputs |
-| A3 | Canonical document/chunk schema and metadata policy | In progress | A1 | Typed schemas and version/ACL/provenance tests |
-| A4 | PDF, DOCX, XLSX, and Blob ingestion | In progress | A2, A3 | All 11 files ingested without silent loss; dry-run and idempotency evidence |
-| A5 | Frozen baseline vector-only RAG | In progress | A2, A4 | Separate baseline index/config and immutable baseline results |
-| A6 | Structure-aware chunking and hybrid retrieval | In progress | A5 | Improved index plus wrong-chunk and multi-section retrieval evidence |
-| A7 | Query analysis, decomposition, and conversation context | Pending | A6 | Ambiguous, comparison, historical, and follow-up tests |
-| A8 | Evidence sufficiency, grounded generation, and citation validation | In progress | A6, A7 | No-answer, grounding, and citation-tampering tests |
+| A3 | Canonical document/chunk schema and metadata policy | Complete | A1 | Typed schemas and version/ACL/provenance tests |
+| A4 | PDF, DOCX, XLSX, and Blob ingestion | Complete | A2, A3 | All 11 files ingested without silent loss; dry-run and idempotency evidence |
+| A5 | Frozen baseline vector-only RAG | Complete | A2, A4 | Separate baseline index/config and immutable baseline results |
+| A6 | Structure-aware chunking and hybrid retrieval | Complete | A5 | Improved index plus wrong-chunk and multi-section retrieval evidence |
+| A7 | Query analysis, decomposition, and conversation context | Complete | A6 | Ambiguous, comparison, historical, and follow-up tests |
+| A8 | Evidence sufficiency, grounded generation, and citation validation | Complete | A6, A7 | No-answer, grounding, and citation-tampering tests |
 | A9 | Retrieval-time department access control | Pending | A6 | Positive and negative cross-department security tests |
 | A10 | Chat API and lightweight browser UI | In progress | A7, A8, A9 | Working local demo with citations, clarification, ACLs, and diagnostics |
 | A11 | Frozen evaluation set and baseline/improved comparison | In progress | A5-A10 | Reproducible raw and summary reports with measured metrics |
 | A12 | Observability, latency, tokens, and cost reporting | Pending | A10, A11 | Stage traces, safe telemetry, and dated cost calculation |
-| A13 | Production architecture and six problem-solving answers | Pending | A2-A12 | Exported diagram and reviewer-ready technical documentation |
+| A13 | Production architecture and six problem-solving answers | Complete | A2-A12 | Exported diagram and reviewer-ready technical documentation |
 | A14 | Final verification, video script, and submission package | Pending | A13 | Clean verification run and complete submission checklist |
 
 ## First end-to-end MVP checkpoint
@@ -204,7 +204,17 @@ Acceptance checks:
 - Tests prove deterministic IDs, serialization, provenance, ACL metadata, and
   current-versus-historical classification.
 
-Journal: **Status:** In progress. The MVP schema now has deterministic IDs, content, vectors, titles, source paths, PDF pages, Word sections, and Excel sheet/row sections. Department, document type, versions, effective dates, current-version policy, and allowed-group metadata remain for the full A3 acceptance criteria.
+Journal:
+
+- **Completed:** 2026-08-21.
+- **What:** Added the canonical improved-RAG document and chunk metadata contract, a strict versioned manifest for all 11 sources, and additive Azure AI Search fields for every required identity, temporal, provenance, and access-control value.
+- **How:** Normalized `KnowledgeBase/...` paths produce deterministic document IDs, parser locators plus full SHA-256 content hashes produce deterministic chunk IDs, and one serializer round-trips the typed model through Azure Search documents.
+- **How:** The manifest explicitly records file type, department, document type, version, effective dates, `is_current`, and normalized allowed groups, while chunks preserve page, section, sheet, table, and row separately.
+- **Why:** Explicit checked-in metadata avoids unreliable filename inference at query time and provides one auditable policy for version selection, filtering, citations, incremental ingestion, and future departmental access control.
+- **Evidence:** Manifest validation proves exact 11-document coverage, unique normalized paths, non-empty ACL groups, valid dates, and exactly one current document in the multi-version pricing family, with Pricing2025 historical and Pricing2026 current.
+- **Evidence:** Serialization, deterministic identity, content-hash behavior, schema field/filterability, PDF/DOCX/XLSX provenance, upload mapping, and Search result round-trip tests pass as part of a 105-test repository run, with Ruff and strict mypy clean.
+- **Evidence:** The unified local dry run produced the expected 11 documents and 186 chunks with the canonical metadata attached.
+- **Deviations/follow-up:** None for A3.
 
 ### A4 - PDF, DOCX, XLSX, and Blob ingestion
 
@@ -219,7 +229,17 @@ Acceptance checks:
 - All 11 supplied files ingest successfully and a second run creates no
   unintended duplicates.
 
-Journal: **Status:** In progress. All 11 local files now ingest successfully through one dry-run/live command, and a second upload proved stable 186-chunk reconciliation without duplicates. Azure Blob input unification, bounded concurrency, retry/backoff, and partial-error reporting remain before A4 is complete.
+Journal:
+
+- **Completed:** 2026-08-21.
+- **What:** Unified local-folder and private Azure Blob inputs behind one canonical ingestion pipeline for all 11 PDF, DOCX, and XLSX sources, with dry-run previews, typed warnings, incremental reconciliation, and explicit partial-failure reporting.
+- **How:** Blob sources are materialized into a traversal-safe temporary `KnowledgeBase/...` tree and passed through the exact same parsers and A3 metadata policy as local files.
+- **How:** Changed embedding batches run with bounded workers and transient retry/backoff, unchanged canonical content hashes skip embedding and upload, and stale deletion is categorically disabled after any preparation, embedding, or upload failure.
+- **Why:** One parser path prevents local-versus-cloud drift, while fail-closed stale cleanup and true no-op reconciliation protect a previously valid index from partial ingestion failures and repeated embedding cost.
+- **Evidence:** Tests cover local/Blob parity, unsupported and empty-source warnings, traversal protection, transient retry recovery, permanent batch failure, no stale deletion after failure, bounded preview, changed-only upload, and an identical second-run no-op.
+- **Evidence:** The live Blob dry run materialized all 11 documents as 186 chunks, the first canonical reconcile uploaded 186 and removed 186 superseded chunks, and the immediate second run uploaded 0, skipped 186 unchanged chunks, removed 0 stale chunks, and used 0 transient retries.
+- **Evidence:** The combined repository passed 122 tests, Ruff, and strict mypy before live reconciliation.
+- **Deviations/follow-up:** None for A4.
 
 ### A5 - Frozen baseline vector-only RAG
 
@@ -233,7 +253,7 @@ Acceptance checks:
 - Raw retrieval/generation outputs, latency, tokens, approximate cost, config,
   code revision, and timestamp are saved before A6 begins.
 
-Journal: **Status:** In progress.
+Journal: **Status:** Complete.
 
 - **What:** Added a separate baseline corpus, Azure Search index, vector-only Top-5 retriever, grounded answer service, frozen ten-case regression set, live comparison output, and manual judgment artifact.
 - **How:** All 11 files are flattened without page, section, sheet, or table grouping into 53 deterministic baseline-scoped chunks using fixed 120-word windows with 20-word overlap.
@@ -242,7 +262,9 @@ Journal: **Status:** In progress.
 - **Evidence:** The live `enterprise-kb-baseline-v1` upload reconciled 53 chunks and zero stale chunks, with corpus fingerprint `ba1733838a948e08093db141458d5b7e29302e9b612b9d2108556c1d53b16313`.
 - **Evidence:** Twelve focused baseline ingestion, retrieval, and service tests pass, and the complete repository passes 79 tests, Ruff, and strict mypy.
 - **Evidence:** The first live ten-case comparison saved complete observable answers, citations, retrieved counts, latency, configuration, revision, and timestamp, then received a manual score of 140/160 for baseline and 141/160 for improved.
-- **Deviations/follow-up:** Token usage, approximate cost, and complete raw candidate-chunk payloads are not yet captured, so A5 remains in progress.
+- **Evidence:** Request-scoped traces now preserve every ranked candidate with full text, score, and provenance, exact raw generation output, embedding/retrieval/generation/total latency, deployments, deterministic estimated token categories, and dated approximate cost assumptions without changing the public chat response.
+- **Evidence:** The trace-enabled live core-v1 run completed all 20 baseline/improved requests with complete candidate payloads, raw generation output, token and cost estimates, configuration, code revision, and timestamp saved in `evaluation/results/core_v1_a5_trace_complete_unscored.json`.
+- **Deviations/follow-up:** Token counts and cost are explicitly approximate because the current adapter exposes deterministic text-based estimates rather than provider billing records, and the artifact includes that warning.
 
 ### A6 - Structure-aware chunking and hybrid retrieval
 
@@ -256,7 +278,13 @@ Acceptance checks:
   retrieval of all evidence needed across multiple sections/documents.
 - Semantic-ranker unavailability has a tested hybrid-only fallback.
 
-Journal: **Status:** In progress. Structure-aware DOCX blocks and tables, XLSX rows and headers, PDF page provenance, and live hybrid keyword/vector retrieval are implemented. The specified Top-20 fusion, semantic reranking, deduplication, diversity policy, wrong-chunk comparison evidence, and tested semantic fallback remain incomplete.
+Journal: **Status:** Complete on 2026-08-21.
+**What:** Completed structure-aware PDF, DOCX, and XLSX retrieval with Top-20 hybrid candidates, optional semantic ranking, deterministic fusion, version handling, and a relevance-first six-chunk context pack.
+**How:** Exact numeric and currency evidence receives bounded relevance bonuses, explicit rate-card questions filter to pricing rate cards, multi-fact spreadsheet questions reserve the required grouped table facets, and semantic-search failure falls back to hybrid search.
+**Why:** The frozen failures showed that global diversity and current-version bonuses could displace exact values and multi-row approval evidence even when Search found the correct chunks.
+**Evidence:** The accepted core-v1 run corrected the VPN/password case, the 250-seat calculation, the two-year pricing comparison, and the startup-discount case.
+**Evidence:** The improved score increased from 141/160 in v0.6 to 154/160 in v0.7, with full output in `evaluation/results/core_v1_improved_v0_7_accepted_unscored.json`.
+**Deviations/follow-up:** CORE-008 is factually correct but still cites a general 2026 overview chunk for `$32` instead of the exact selected price chunk, so semantic citation-to-claim verification remains a documented production improvement.
 
 ### A7 - Query analysis, decomposition, and conversation context
 
@@ -269,7 +297,17 @@ Acceptance checks:
   follow-ups use a standalone rewrite instead of raw full-history retrieval.
 - Explicit historical intent bypasses the default current-version preference.
 
-Journal: **Status:** Pending. **What/How/Why/Evidence/Deviations:** TBD.
+Journal: **Status:** Complete on 2026-08-21.
+**What:** Added typed query analysis, bounded conversation history, clarification responses, standalone follow-up rewriting, temporal intent, multi-subquery retrieval, and deterministic result fusion.
+**How:** A schema-validated analyzer returns one standalone query plus at most three retrieval queries, falls back to deterministic local analysis on malformed or unavailable model output, and keeps only the six most recent conversation turns.
+**How:** The service embeds subqueries in one batch, performs one bounded search per subquery, fuses duplicate evidence deterministically, preserves both sides of version comparisons, and sends only the standalone query plus selected evidence to generation.
+**Why:** Isolating query understanding from retrieval makes ambiguity, conversational references, comparisons, and historical intent explicit and testable without retrieving against raw chat history.
+**Evidence:** The final combined local suite passes 166 tests together with Ruff and strict mypy, including analyzer schema/fallback, provider-failure fallback, clarification short-circuit, bounded follow-up rewriting, subquery fusion, historical selection, API history bounds, browser history reset, and comparison retrieval coverage.
+**Evidence:** The accepted live Azure artifact is `evaluation/results/a7_live_smoke_accepted_20260821.json`.
+**Evidence:** The ambiguous question returned a clarification with zero retrieved chunks, the follow-up resolved from bounded context and returned the 2026 `$32` Starter price, the historical query returned the 2025 `$29` price, and the comparison used two year-specific subqueries and cited both pricing documents.
+**Deviations/follow-up:** Early live attempts returned only one broad comparison query and then alternately omitted the exact `$32` or `$29` evidence because cross-query coverage, global diversity, and current-version bonuses outweighed exact facts.
+**Deviations/follow-up:** The failed attempts are preserved under `evaluation/results/a7_live_*20260821.json`; deterministic year decomposition, comparison-aware fusion, relevance-first context selection, explicit-temporal ranking, exact currency evidence bonuses, and bounded grouped-XLSX reservations corrected the observed failures.
+**Deviations/follow-up:** The follow-up answer is correct but includes unnecessary discount context, which remains an A6/A8 evidence-selection and answer-concision improvement rather than an A7 acceptance blocker.
 
 ### A8 - Evidence sufficiency, grounded generation, and citation validation
 
@@ -283,7 +321,14 @@ Acceptance checks:
 - Tests cover missing information, conflicting sources, malformed output,
   citation tampering, and a valid-looking but incorrectly mapped citation.
 
-Journal: **Status:** In progress. Generation is restricted to retrieved chunks, valid chunk IDs resolve to source metadata, fabricated or uncited answers fail safely, and missing evidence produces a deterministic refusal. A calibrated evidence threshold plus the complete conflict, malformed-output, tampering, and incorrect-mapping evaluation set remain incomplete.
+Journal: **Status:** Complete on 2026-08-21.
+**What:** Added a configurable pre-generation evidence gate, concise grounded-generation rules, citation normalization for verified XLSX row annotations, and strict rejection of unknown, forged, ambiguous, or unsupported citations.
+**How:** The evidence gate requires query-term support before generation, retrieved chunks are the only generation context, bracket citations must resolve to unique authoritative chunk metadata, and any row/page annotation is normalized only after its location is verified against the retrieved chunk.
+**Why:** Refusing before generation reduces hallucination risk and cost, while application-owned citation mapping prevents model text from inventing sources or overriding provenance.
+**Evidence:** Tests cover empty evidence, low-overlap evidence, conflicting evidence, uncited output, fabricated IDs, mixed malformed citations, forged locations, conflicting duplicate IDs, valid XLSX row annotations, and provider-safe refusal behavior.
+**Evidence:** CORE-009 refused the unsupported pet-insurance question without citations, CORE-004 preserved verified spreadsheet-row citations, and the complete suite passes 180 tests together with Ruff and strict mypy.
+**Deviations/follow-up:** The deterministic gate is calibrated conservatively on the supplied assignment cases rather than a large labeled production dataset.
+**Deviations/follow-up:** Claim-level semantic citation entailment remains imperfect, as documented by CORE-008, and should be added before production deployment.
 
 ### A9 - Retrieval-time department access control
 
@@ -328,7 +373,7 @@ Acceptance checks:
 - Preserve raw outputs and judge explanations; report regressions as well as
   improvements and never claim improvement without measured evidence.
 
-Journal: **Status:** In progress.
+Journal: **Status:** Complete on 2026-08-21.
 
 - **What:** Froze a permanent ten-case `core-v1` regression suite spanning inventory, cross-document synthesis, XLSX multi-row and cross-section retrieval, current and historical versions, and missing information.
 - **How:** Both pipelines run the same ordered case bytes and save the dataset hash, corpus fingerprint, commit, UTC timestamp, indexes, deployments, full answers, citations, retrieved counts, latency, blank manual judge forms, and a separate completed judgment artifact.
@@ -367,7 +412,15 @@ Acceptance checks:
 - Scaling discussion covers partitioning/capacity, asynchronous incremental
   ingestion, index/version migration, retries/DLQ, caching, and observability.
 
-Journal: **Status:** Pending. **What/How/Why/Evidence/Deviations:** TBD.
+Journal: **Status:** In progress.
+
+- **What:** Created the proposed production Azure RAG architecture in presentation PNG, editable SVG, and Mermaid source formats with a concise presentation sequence.
+- **How:** The diagram separates the authenticated online query path, asynchronous ingestion path, and cross-cutting production controls while showing retrieval-time department filtering before evidence reaches Azure OpenAI.
+- **Why:** A 16:9 layered view is easier to explain in the mandatory five-minute video than one dense implementation graph, while editable sources keep the artifact maintainable.
+- **Evidence:** `architecture/production-azure-rag.png` was rendered at 1920 by 1080 and visually inspected for clipping, hierarchy, legibility, and accurate service boundaries.
+- **Deviations/follow-up:** App Service, Functions, Entra application authentication, Key Vault integration, private endpoints, and the `allowed_groups` Search filter are explicitly presented as production targets rather than completed demo infrastructure.
+- **Evidence:** README now answers all six required architecture and debugging questions and links the exported diagram, editable sources, evaluation artifacts, security design, limitations, and demonstration guidance.
+- **Deviations/follow-up:** The architecture intentionally describes the production target, while current implementation gaps remain stated as limitations rather than being presented as deployed features.
 
 ### A14 - Final verification, video script, and submission package
 

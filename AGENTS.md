@@ -23,3 +23,28 @@ These are common instructions for Kun's agents across all scenarios.
 * Prioritize getting a thin, demonstrable, end-to-end version running before hardening individual components.
 * Do not block the first working RAG flow on production-grade infrastructure, exhaustive abstractions, comprehensive evaluation, or pixel-perfect UI.
 * After the first end-to-end flow works, improve quality, security, evaluation, observability, and documentation iteratively.
+
+
+## Subagent delegation
+
+Use subagents aggressively to reduce work performed by the primary Sol agent.
+
+Default to Luna subagents for:
+- repository exploration and code search
+- locating relevant files and call sites
+- reading and summarizing modules
+- straightforward implementation tasks
+- writing or updating tests
+- running tests and investigating simple failures
+- mechanical refactors
+- documentation
+- independent verification of changes
+
+The primary Sol agent should focus on:
+- task decomposition
+- architecture and design decisions
+- difficult debugging
+- ambiguous requirements
+- reviewing subagent findings
+- integrating changes
+- final verification

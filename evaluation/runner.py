@@ -28,6 +28,20 @@ class AnswerService(Protocol):
     async def answer(self, *, question: str, top_k: int) -> ChatResult: ...
 
 
+def _request_trace(service: AnswerService) -> dict[str, Any] | None:
+    """Read optional diagnostics without adding them to the public chat model."""
+
+    getter = getattr(service, "get_last_trace", None)
+    if not callable(getter):
+        return None
+    trace = getter()
+    serializer = getattr(trace, "to_dict", None)
+    if not callable(serializer):
+        return None
+    serialized = serializer()
+    return serialized if isinstance(serialized, dict) else None
+
+
 def load_frozen_dataset(path: Path) -> tuple[dict[str, Any], str]:
     """Load and validate the immutable ten-case contract."""
 
@@ -79,6 +93,7 @@ async def evaluate_pipeline(
                 "retrieved_chunks": result.retrieved_chunks if result else None,
                 "latency_ms": latency_ms,
                 "error": error,
+                "request_trace": _request_trace(service),
                 "manual_judgment": {
                     "correctness_0_to_4": None,
                     "completeness_0_to_4": None,
@@ -129,8 +144,7 @@ async def run(pipeline: str, dataset_path: Path) -> dict[str, Any]:
     if pipeline in {"improved", "both"}:
         services.append(("improved", get_rag_service()))
     results = [
-        await evaluate_pipeline(name, service, dataset["cases"])
-        for name, service in services
+        await evaluate_pipeline(name, service, dataset["cases"]) for name, service in services
     ]
     return {
         "dataset": {

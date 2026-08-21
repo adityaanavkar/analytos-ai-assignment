@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "source_path": "KnowledgeBase/Finance/ExpensePolicy.pdf",
+      "title": "Business Expense & Reimbursement Policy",
+      "file_type": "pdf",
+      "department": "Finance",
+      "document_type": "expense_policy",
+      "version": "5.1",
+      "effective_from": "2026-02-01",
+      "effective_to": null,
+      "is_current": true,
+      "allowed_groups": ["employees", "finance"]
+    },
+    {
+      "source_path": "KnowledgeBase/Finance/TravelPolicy.docx",
+      "title": "Business Travel Policy",
+      "file_type": "docx",
+      "department": "Finance",
+      "document_type": "travel_policy",
+      "version": "3.2",
+      "effective_from": "2026-01-01",
+      "effective_to": null,
+      "is_current": true,
+      "allowed_groups": ["employees", "finance"]
+    },
+    {
+      "source_path": "KnowledgeBase/HR/Benefits.pdf",
+      "title": "Employee Benefits Guide",
+      "file_type": "pdf",
+      "department": "HR",
+      "document_type": "benefits_guide",
+      "version": "3.0",
+      "effective_from": "2026-01-01",
+      "effective_to": "2026-12-31",
+      "is_current": true,
+      "allowed_groups": ["employees", "hr"]
+    },
+    {
+      "source_path": "KnowledgeBase/HR/LeavePolicy.pdf",
+      "title": "Leave & Time Off Policy",
+      "file_type": "pdf",
+      "department": "HR",
+      "document_type": "leave_policy",
+      "version": "4.2",
+      "effective_from": "2026-01-01",
+      "effective_to": null,
+      "is_current": true,
+      "allowed_groups": ["employees", "hr"]
+    },
+    {
+      "source_path": "KnowledgeBase/IT/PasswordPolicy.docx",
+      "title": "Password & Authentication Policy",
+      "file_type": "docx",
+      "department": "IT",
+      "document_type": "password_policy",
+      "version": "4.0",
+      "effective_from": "2026-03-01",
+      "effective_to": null,
+      "is_current": true,
+      "allowed_groups": ["employees", "it"]
+    },
+    {
+      "source_path": "KnowledgeBase/IT/VPNGuide.pdf",
+      "title": "NorthLink VPN Setup & Usage Guide",
+      "file_type": "pdf",
+      "department": "IT",
+      "document_type": "vpn_guide",
+      "version": "2.3",
+      "effective_from": "2026-03-01",
+      "effective_to": null,
+      "is_current": true,
+      "allowed_groups": ["employees", "it"]
+    },
+    {
+      "source_path": "KnowledgeBase/Legal/NDA.docx",
+      "title": "Mutual Non-Disclosure Agreement Template",
+      "file_type": "docx",
+      "department": "Legal",
+      "document_type": "nda_template",
+      "version": "3.1",
+      "effective_from": null,
+      "effective_to": null,
+      "is_current": true,
+      "allowed_groups": ["legal"]
+    },
+    {
+      "source_path": "KnowledgeBase/Legal/VendorContract.pdf",
+      "title": "Vendor Service Agreement Template",
+      "file_type": "pdf",
+      "department": "Legal",
+      "document_type": "vendor_agreement_template",
+      "version": "6.0",
+      "effective_from": null,
+      "effective_to": null,
+      "is_current": true,
+      "allowed_groups": ["legal"]
+    },
+    {
+      "source_path": "KnowledgeBase/Sales/Discounts.xlsx",
+      "title": "OrbitSuite Discount Schedule",
+      "file_type": "xlsx",
+      "department": "Sales",
+      "document_type": "discount_schedule",
+      "version": "2.0",
+      "effective_from": "2026-01-01",
+      "effective_to": null,
+      "is_current": true,
+      "allowed_groups": ["sales"]
+    },
+    {
+      "source_path": "KnowledgeBase/Sales/Pricing2025.pdf",
+      "title": "OrbitSuite Pricing 2025 Rate Card",
+      "file_type": "pdf",
+      "department": "Sales",
+      "document_type": "pricing_rate_card",
+      "version": "1.4",
+      "effective_from": "2025-01-01",
+      "effective_to": "2025-12-31",
+      "is_current": false,
+      "allowed_groups": ["sales"]
+    },
+    {
+      "source_path": "KnowledgeBase/Sales/Pricing2026.pdf",
+      "title": "OrbitSuite Pricing 2026 Rate Card",
+      "file_type": "pdf",
+      "department": "Sales",
+      "document_type": "pricing_rate_card",
+      "version": "1.0",
+      "effective_from": "2026-01-01",
+      "effective_to": null,
+      "is_current": true,
+      "allowed_groups": ["sales"]
+    }
+  ]
+}

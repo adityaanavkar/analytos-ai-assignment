@@ -23,3 +23,12 @@ Scores must never be generated automatically from keyword matching or filled wit
 Every completed RAG version must copy its full outputs, individual scores, rationale, aggregate score, and candid failure analysis into `VERSIONS.md`.
 
 Historical versions that were not run against these exact bytes must be labeled `Not evaluated on core-v1` rather than assigned reconstructed scores.
+
+## Accepted submission artifacts
+
+- `results/core_v1_baseline_vs_improved_v0_6.json` preserves the frozen baseline and first improved live outputs.
+- `results/core_v1_baseline_vs_improved_v0_6_judgment.json` preserves the manual baseline and first-improved scores and rationale.
+- `results/core_v1_improved_v0_7_accepted_unscored.json` preserves the accepted improved answers, citations, candidates, selected context, stage latency, token estimates, and approximate cost.
+- `results/core_v1_improved_v0_7_accepted_judgment.json` preserves the accepted improved manual score of 154/160 and candid remaining weaknesses.
+
+The current submission reports the frozen ten-case evaluation honestly and does not present it as the broader twenty-case production suite planned for future work.

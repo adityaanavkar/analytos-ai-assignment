@@ -1,0 +1,48 @@
+flowchart LR
+  classDef current fill:#1677c8,color:#fff,stroke:#0f65ae,stroke-width:2px
+  classDef proposed fill:#24232b,color:#fff,stroke:#77747d,stroke-width:2px,stroke-dasharray:6 4
+  classDef secure fill:#c9ff45,color:#17171b,stroke:#9fd51e,stroke-width:2px
+  classDef support fill:#fbfaf4,color:#17171b,stroke:#bdb7aa,stroke-width:1px
+
+  subgraph QUERY[Authenticated online query path]
+    U[Employee or reviewer]
+    I[Microsoft Entra ID<br/>Front Door and WAF]
+    A[Azure App Service<br/>FastAPI and RAG orchestrator]
+    S[Azure AI Search<br/>Hybrid, vector, semantic]
+    O[Azure OpenAI<br/>Grounded generation]
+    R[Answer with numbered citations<br/>or safe refusal]
+    U -->|HTTPS| I -->|JWT claims| A
+    A -->|Query plus allowed_groups filter| S
+    S -->|Authorized evidence only| O
+    O -->|Draft answer| A
+    A -->|Validated citations| R
+  end
+
+  subgraph INGEST[Asynchronous document ingestion and indexing]
+    D[Approved PDF, DOCX, XLSX]
+    B[Azure Blob Storage]
+    F[Event Grid and Azure Functions]
+    P[Parse, clean, and structure-aware chunk]
+    M[Attach provenance, version,<br/>department, and allowed_groups]
+    E[Azure OpenAI embeddings]
+    D -.-> B -.-> F -.-> P -.-> M -.-> E -.-> S
+  end
+
+  subgraph CONTROLS[Cross-cutting production controls]
+    K[Key Vault and managed identity]
+    N[Private endpoints and VNet]
+    T[Application Insights and Log Analytics]
+    C[Autoscale, queues, caching,<br/>budgets, quotas, and token limits]
+  end
+
+  K -.-> A
+  N -.-> A
+  N -.-> S
+  T -.-> A
+  T -.-> S
+  C -.-> A
+
+  class S,O,B current
+  class I,A,F,K,N proposed
+  class R,M secure
+  class U,D,P,E,T,C support

@@ -14,6 +14,14 @@ htmlcov/
 # Generated RAG artifacts
 .cache/
 artifacts/
+evaluation/results/*attempt*.json
+evaluation/results/*diagnostic*.json
+evaluation/results/a7_live_smoke_20260821.json
+evaluation/results/a7_live_smoke_final_20260821.json
+evaluation/results/core_v1_a6_complete_unscored.json
+evaluation/results/core_v1_improved_v0_7_unscored.json
+evaluation/results/core_v1_improved_v0_7_final_unscored.json
+final_submission/
 
 # Editors and operating systems
 .idea/

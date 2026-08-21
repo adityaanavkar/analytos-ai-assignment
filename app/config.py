@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     azure_search_endpoint: str | None = None
     azure_search_baseline_index: str = "enterprise-kb-baseline-v1"
     azure_search_improved_index: str = "enterprise-kb-improved-v1"
+    azure_search_semantic_enabled: bool = True
 
     azure_storage_account_url: str | None = None
     azure_storage_container: str = "knowledge-base"

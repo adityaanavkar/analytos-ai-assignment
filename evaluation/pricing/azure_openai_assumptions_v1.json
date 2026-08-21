@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "pricing_id": "azure-openai-assignment-estimate-v1",
+  "effective_date": "2026-08-21",
+  "currency": "USD",
+  "source_note": "Explicit assignment assumptions for reproducible comparisons. These values are not an Azure billing quote and must be verified against the deployed region, offer, and contract before financial decisions.",
+  "token_estimation": {
+    "method_id": "utf8-bytes-divided-by-4-v1",
+    "description": "For each captured text, estimate zero tokens for empty text and otherwise ceil(UTF-8 byte length divided by four). Message framing, tool schemas, and provider-side hidden tokens are excluded."
+  },
+  "models": {
+    "text-embedding-3-small": {
+      "input_usd_per_million_tokens": "0.020000",
+      "output_usd_per_million_tokens": "0"
+    },
+    "gpt-4.1-mini": {
+      "input_usd_per_million_tokens": "0.400000",
+      "output_usd_per_million_tokens": "1.600000"
+    }
+  }
+}

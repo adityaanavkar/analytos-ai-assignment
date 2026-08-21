@@ -1,0 +1,33 @@
+{
+  "judge": "Staff-level manual review against the frozen core-v1 expected facts and sources",
+  "artifact": "evaluation/results/core_v1_improved_v0_7_accepted_unscored.json",
+  "rubric": {
+    "dimensions": ["correctness", "completeness", "grounding", "citation_quality"],
+    "scale": "0-4 per dimension; 16 maximum per case",
+    "baseline_v0_6_total": 140,
+    "improved_v0_6_total": 141,
+    "improved_v0_7_total": 154,
+    "maximum": 160
+  },
+  "improved_v0_7": {
+    "CORE-001": [4, 3, 4, 4, 15, "Listed all 11 documents and department paths, but did not render explicit department headings."],
+    "CORE-002": [4, 4, 4, 3, 15, "All required facts are correct and grounded, but the response cites ExpensePolicy rather than also citing the expected TravelPolicy source."],
+    "CORE-003": [4, 4, 4, 4, 16, "Correct portal URL, VPN-specific Okta Verify push, 12-character minimum, and both IT sources."],
+    "CORE-004": [4, 4, 4, 4, 16, "Correct 20% plus 15% calculation, 35% combined discount, $42.25 final price, and CRO plus Finance Business Partner approval."],
+    "CORE-005": [4, 4, 4, 4, 16, "Complete PTO and benefits timing answer with both required sources."],
+    "CORE-006": [4, 4, 4, 4, 16, "Complete three-year versus five-year comparison with indefinite trade-secret treatment and both legal sources."],
+    "CORE-007": [4, 4, 4, 3, 15, "Correct current $65 and 100,000-call values, with one unnecessary Discounts citation."],
+    "CORE-008": [4, 4, 3, 2, 13, "All four values are correct, but the $32 claim cites a general 2026 overview chunk instead of the exact selected pricing chunk."],
+    "CORE-009": [4, 4, 4, 4, 16, "Correct deterministic refusal with no citations."],
+    "CORE-010": [4, 4, 4, 4, 16, "Correct 30% rate, non-stacking rule, annual re-verification, and spreadsheet citations."],
+    "total": 154,
+    "percentage": 96.25
+  },
+  "candid_failure_analysis": [
+    "The improved score rose from 141/160 to 154/160, a 13-point gain over v0.6.",
+    "CORE-001 should format inventory under explicit department headings.",
+    "CORE-002 should cite TravelPolicy as well as ExpensePolicy for the travel submission rule.",
+    "CORE-007 includes an unnecessary Discounts citation.",
+    "CORE-008 is factually correct but demonstrates the remaining valid-looking wrong-chunk citation risk for the $32 claim."
+  ]
+}

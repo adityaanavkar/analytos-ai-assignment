@@ -101,19 +101,15 @@ Known failures and disappointing behavior must be recorded candidly instead of b
 
 The working system is a real Azure-backed, multi-format RAG demonstration, but it is not yet the completed assignment.
 
-The master checklist currently contains three complete actions, five in-progress actions, and seven pending actions across P0 and A1 through A14.
+The master checklist currently contains seven complete actions, four in-progress actions, and four pending actions across P0 and A1 through A14.
 
-The tracker currently marks A6, A8, and A10 as in progress in the master checklist while their detailed journal lines still say pending.
+The strongest verified result is a complete 11-document Azure corpus with typed metadata, idempotent Blob ingestion, a frozen vector-only baseline, validated citations, and completed A7 conversational query handling.
 
-That mismatch is a documentation weakness and should be reconciled in the next tracker update rather than treated as implementation evidence.
-
-The strongest verified result is complete local-corpus availability with live grounded answers and validated citations across PDF, DOCX, and XLSX sources.
-
-The largest remaining proof gap is the frozen baseline-versus-improved evaluation, because retrieval improvement must be demonstrated with measured results rather than asserted.
+The largest remaining proof gap is a new frozen baseline-versus-improved evaluation after the active A6 and A8 fixes, because the v0.6 result showed only an immaterial one-point improvement.
 
 The largest remaining production gap is retrieval-time departmental access control backed by validated identity claims.
 
-After the active chat-first UI work, the recommended engineering milestone is A5, which must freeze a vector-only baseline and preserve immutable measured results before improved retrieval is evaluated.
+The recommended next milestone is to finish A6 and A8, rerun and manually judge the unchanged ten cases, and then implement retrieval-time departmental access control in A9.
 
 `IMPLEMENTATION_PLAN.md` remains the source of truth for action status, acceptance criteria, and detailed completion evidence.
 
@@ -319,3 +315,84 @@ Citations: `KnowledgeBase/Sales/Discounts.xlsx`.
 > Eligibility is checked annually.
 
 Citations: `KnowledgeBase/Sales/Discounts.xlsx`.
+
+## v0.7 - Retrieval quality, conversational analysis, and evidence safeguards
+
+- **Status:** Completed and evaluated on 2026-08-21.
+- **Core-v1 evaluation:** Improved v0.7 scored **154/160 (96.25%)**, compared with improved v0.6 at **141/160 (88.1%)** and the frozen baseline at **140/160 (87.5%)**.
+- **Measured gain:** The improved pipeline gained 13 points over its previous version and 14 points over the baseline without changing the frozen questions.
+- **Objective:** The objective was to complete A7 with typed query analysis, bounded conversational context, clarification, standalone follow-up rewriting, temporal intent, and comparison decomposition.
+- **Achieved:** Ambiguous questions now clarify before retrieval, up to six recent turns can resolve follow-ups, explicit historical questions retain historical evidence, and explicit two-year comparisons issue one retrieval query per year.
+- **How it works:** A strict query-analysis schema crosses into retrieval, malformed or unavailable provider output falls back deterministically, subquery results are fused and deduplicated, and request traces record the standalone query, ambiguity, temporal intent, subqueries, and context-resolution state.
+- **API and UI behavior:** The public API accepts bounded typed history and returns answer or clarification status, while the chat interface stores only six recent successful turns and clears them on New chat.
+- **Verification evidence:** The accepted live artifact is `evaluation/results/a7_live_smoke_accepted_20260821.json`.
+- **Verification evidence:** The accepted Azure run clarified `What is the limit?` without retrieval, resolved `What about Starter?` to the recent 2026 pricing topic, returned `$29` for the explicit 2025 query, and compared `$29` in 2025 with `$32` in 2026 using citations from both pricing documents.
+- **Verification evidence:** The final local gate passed 180 tests, Ruff, and strict mypy across 58 source files.
+- **Failure observed:** The first live comparison produced only one broad query and omitted the exact 2026 `$32` evidence.
+- **Failure observed:** Later attempts alternately recovered `$32` while losing `$29` because cross-query coverage, global diversity, and a current-version ranking bonus outweighed exact version-specific evidence.
+- **How the failures were corrected:** Deterministic year decomposition, comparison-aware fusion, relevance-first selection, removal of current bias for explicit temporal queries, exact currency and rate-card bonuses, and bounded grouped-XLSX reservation were added with regression tests.
+- **Known weakness:** The follow-up answer is factually correct but includes unnecessary discount context after stating the `$32` answer.
+- **A6/A8 result:** CORE-003 now returns the exact VPN URL, Okta push method, and 12-character password; CORE-004 returns 35%, `$42.25`, and the correct approvers; CORE-008 returns `$29/$32` and `$12/$14`; and CORE-009 still refuses unsupported information.
+- **Raw artifacts:** Full answers, citations, traces, latency, token estimates, and cost estimates are in `evaluation/results/core_v1_improved_v0_7_accepted_unscored.json`.
+- **Manual judgment:** Per-case scores and candid rationale are in `evaluation/results/core_v1_improved_v0_7_accepted_judgment.json`.
+- **Known weakness:** CORE-001 does not render explicit department headings, CORE-002 omits the expected TravelPolicy citation, CORE-007 has one unnecessary Discounts citation, and CORE-008 cites a general 2026 overview chunk rather than the exact selected `$32` chunk.
+- **Next focus:** Implement A9 retrieval-time department access control and retain claim-level citation entailment as a documented A8 production-hardening improvement.
+
+### v0.7 scorecard
+
+| Case | Improved v0.6 | Improved v0.7 | Judge finding |
+|---|---:|---:|---|
+| CORE-001 | 15/16 | 15/16 | All 11 documents are correct, but explicit department headings are still absent. |
+| CORE-002 | 16/16 | 15/16 | All facts are correct, but TravelPolicy is not cited. |
+| CORE-003 | 11/16 | 16/16 | Exact portal, Okta push, password length, and both sources are now present. |
+| CORE-004 | 7/16 | 16/16 | The complete discount calculation and approval evidence are now correct. |
+| CORE-005 | 16/16 | 16/16 | Complete and correctly cited. |
+| CORE-006 | 16/16 | 16/16 | Complete and correctly cited. |
+| CORE-007 | 16/16 | 15/16 | Facts are correct, but one unnecessary Discounts citation remains. |
+| CORE-008 | 12/16 | 13/16 | All four values are correct, but the `$32` claim uses a weak chunk citation. |
+| CORE-009 | 16/16 | 16/16 | Correct refusal with no citations. |
+| CORE-010 | 16/16 | 16/16 | Complete and correctly cited. |
+| **Total** | **141/160** | **154/160** | **A measured 13-point improvement.** |
+
+### v0.7 recorded outputs
+
+- **CORE-001:** Listed all 11 indexed documents with their complete department paths.
+- **CORE-002:** Returned the 30-day submission requirement, `$25` receipt threshold, and Department VP approval for `$3,000`.
+- **CORE-003:** Returned `vpn.northwindtraders.example`, Okta Verify push approval, and the 12-character password minimum.
+- **CORE-004:** Returned a 20% volume discount plus 15% annual discount, 35% combined discount, `$42.25` final monthly price, and Chief Revenue Officer plus Finance Business Partner approval.
+- **CORE-005:** Returned PTO accrual from the first day and benefits from the first day of the month following 30 days.
+- **CORE-006:** Returned three years after disclosure for the NDA, five years after termination for the vendor agreement, and indefinite protection for trade secrets in both.
+- **CORE-007:** Returned the current Professional price of `$65` and API limit of 100,000 calls per month.
+- **CORE-008:** Returned Starter at `$29` in 2025 and `$32` in 2026, with Advanced Analytics at `$12` in 2025 and `$14` in 2026.
+- **CORE-009:** Returned the deterministic insufficient-evidence response with no citations.
+- **CORE-010:** Returned the 30% Year 1 startup discount, non-stacking rule, and annual eligibility re-verification.
+
+## v0.8 - Submission verification and citation presentation
+
+- **Status:** Completed on 2026-08-21.
+- **Objective:** Verify the submission through the real application path and remove internal citation identifiers from the browser experience.
+- **Problem found:** Azure OpenAI correctly returned verified chunk identifiers, but the browser exposed opaque values such as `[0156aae7e4fcee66699cd23d]`, and occasional nested model output appeared as `[[chunk-id]]`.
+- **Reasoning:** Exact chunk identifiers remain necessary inside the API for citation validation and evaluation, but they are implementation details and should not distract end users.
+- **How it was corrected:** The service now collapses nested verified citation brackets, while the browser maps verified identifiers to numbered references such as `[1]` and shows only the source path and page or section.
+- **Live verification:** A normal expense-policy question returned the correct 30-day deadline and `$25` receipt threshold with citations.
+- **Live verification:** An unsupported CEO-favorite-color question returned the deterministic insufficient-evidence response with no citations.
+- **Live verification:** The inventory question returned exactly 11 indexed documents.
+- **Evaluation verification:** The frozen 10-case dataset and accepted result artifacts are valid JSON, and the accepted score remains 154/160 or 96.25%.
+- **Home-screen regression found:** Three of the four built-in suggestions returned an insufficient-evidence response despite retrieving relevant chunks.
+- **Root cause:** Broad password retrieval selected headings instead of concrete table rows, while correct discount answers grouped multiple verified IDs inside one citation block that the strict validator rejected.
+- **How it was corrected:** Broad requirements queries now reserve matching structured table rows, and grouped citations are expanded only when every identifier maps to retrieved evidence.
+- **Live regression result:** All four built-in suggestions now return grounded answers through the Azure-backed application.
+- **Quality gate:** All 180 tests pass, Ruff lint passes, Ruff formatting passes, and strict mypy reports no issues across 58 source files.
+- **Security check:** `.env` is ignored, only the placeholder `.env.example` is tracked, and no obvious credentials were found in tracked files.
+
+## v0.9 - Presentation-ready production architecture
+
+- **Status:** A13 completed on 2026-08-21.
+- **Objective:** Produce a clear enterprise Azure architecture artifact suitable for the final submission and five-minute presentation.
+- **What was delivered:** A 1920 by 1080 PNG, editable SVG, Mermaid source, and concise presentation sequence were added under `architecture/`.
+- **How it is organized:** The visual separates the authenticated online query path, asynchronous ingestion and indexing path, and cross-cutting production controls.
+- **Security reasoning:** Trusted Entra claims become a server-side `allowed_groups` Search filter so unauthorized chunks are excluded before Azure OpenAI receives context.
+- **Production coverage:** The diagram includes Front Door and WAF, App Service, Blob Storage, Functions, Azure AI Search, Azure OpenAI, managed identity, Key Vault, private networking, monitoring, autoscaling, resilience, and cost governance.
+- **Honest scope:** The current local application and deployed Azure AI services are distinguished from proposed production hosting and security components.
+- **Verification:** The exported PNG was rendered from the SVG and visually inspected at its native 16:9 resolution for clipping, readability, hierarchy, and architecture correctness.
+- **Documentation:** README includes the six required problem-solving answers, architecture rationale, security design, measured evaluation comparison, limitations, production improvements, direct evidence links, and demonstration guidance.

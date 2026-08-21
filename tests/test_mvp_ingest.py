@@ -6,7 +6,11 @@ from unittest.mock import Mock
 import pytest
 
 from app.config import Settings
-from app.rag.azure import AzureOpenAIAdapter, AzureSearchAdapter
+from app.rag.azure import (
+    SEMANTIC_CONFIGURATION_NAME,
+    AzureOpenAIAdapter,
+    AzureSearchAdapter,
+)
 from scripts import mvp_ingest
 
 EXPENSE_POLICY = Path("KnowledgeBase/Finance/ExpensePolicy.pdf")
@@ -65,6 +69,49 @@ def test_index_schema_has_1536_dimension_hnsw_profile() -> None:
     assert profiles is not None
     assert algorithms[0].name == "mvp-hnsw"
     assert profiles[0].algorithm_configuration_name == "mvp-hnsw"
+
+
+def test_improved_schema_configures_semantic_ranking() -> None:
+    schema = mvp_ingest.build_index_schema("test-index")
+
+    assert schema.semantic_search is not None
+    configurations = schema.semantic_search.configurations
+    assert configurations is not None
+    assert configurations[0].name == SEMANTIC_CONFIGURATION_NAME
+    fields = configurations[0].prioritized_fields
+    assert fields.title_field is not None
+    assert fields.content_fields is not None
+    assert fields.title_field.field_name == "title"
+    assert [field.field_name for field in fields.content_fields] == ["content"]
+
+
+def test_index_schema_exposes_canonical_metadata_for_filtering() -> None:
+    schema = mvp_ingest.build_index_schema("test-index")
+    fields = {field.name: field for field in schema.fields}
+
+    required = {
+        "content_hash",
+        "document_id",
+        "file_type",
+        "department",
+        "document_type",
+        "version",
+        "effective_from",
+        "effective_to",
+        "is_current",
+        "page_number",
+        "section",
+        "sheet_name",
+        "table_number",
+        "row_number",
+        "allowed_groups",
+    }
+    assert required <= fields.keys()
+    assert all(fields[name].filterable is True for name in required)
+    assert fields["department"].facetable is True
+    assert fields["document_type"].facetable is True
+    assert fields["effective_from"].sortable is True
+    assert fields["effective_to"].sortable is True
 
 
 def test_upload_creates_index_embeds_and_uploads(monkeypatch: pytest.MonkeyPatch) -> None:

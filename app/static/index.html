@@ -474,16 +474,29 @@
       const retrievedCount = document.querySelector("#retrieved-count");
       const citations = document.querySelector("#citations");
       const newChat = document.querySelector("#new-chat");
+      const MAX_HISTORY_TURNS = 6;
+      let conversationHistory = [];
 
       function scrollToLatest() {
         result.scrollTop = result.scrollHeight;
       }
 
-      function citationLabel(citation) {
+      function citationLabel(citation, position) {
         const location = citation.page
           ? `page ${citation.page}`
           : citation.section || "location not provided";
-        return `${citation.source} - ${location} (${citation.chunk_id})`;
+        return `[${position}] ${citation.source} - ${location}`;
+      }
+
+      function displayAnswer(payload) {
+        let rendered = payload.answer;
+        payload.citations.forEach((citation, index) => {
+          rendered = rendered.replaceAll(`[${citation.chunk_id}]`, `[${index + 1}]`);
+        });
+        return rendered.replace(/(?:\s*\[\d+\])+/g, (cluster) => {
+          const markers = cluster.match(/\[\d+\]/g) || [];
+          return ` ${[...new Set(markers)].join(" ")}`;
+        });
       }
 
       function updateLatestEvidence(payload) {
@@ -495,9 +508,9 @@
           citations.appendChild(item);
           return;
         }
-        for (const citation of payload.citations) {
+        for (const [index, citation] of payload.citations.entries()) {
           const item = document.createElement("li");
-          item.textContent = citationLabel(citation);
+          item.textContent = citationLabel(citation, index + 1);
           citations.appendChild(item);
         }
       }
@@ -526,10 +539,11 @@
         body.className = "message-body";
         const label = document.createElement("span");
         label.className = "message-label mono";
-        label.textContent = "Assistant";
+        label.textContent = payload.status === "clarification" ? "Clarification needed" : "Assistant";
         const content = document.createElement("p");
         content.className = "message-text";
-        content.textContent = payload.answer;
+        const renderedAnswer = displayAnswer(payload);
+        content.textContent = renderedAnswer;
         const meta = document.createElement("div");
         meta.className = "turn-meta";
         meta.textContent = `${payload.retrieved_chunks} chunks retrieved`;
@@ -542,9 +556,9 @@
           summary.textContent = `${payload.citations.length} source citation${payload.citations.length === 1 ? "" : "s"}`;
           const list = document.createElement("ol");
           list.className = "citation-list";
-          for (const citation of payload.citations) {
+          for (const [index, citation] of payload.citations.entries()) {
             const item = document.createElement("li");
-            item.textContent = citationLabel(citation);
+            item.textContent = citationLabel(citation, index + 1);
             list.appendChild(item);
           }
           details.append(summary, list);
@@ -552,7 +566,7 @@
         }
         message.append(mark, body);
         conversation.insertBefore(message, loading);
-        answer.textContent = payload.answer;
+        answer.textContent = renderedAnswer;
       }
 
       function resetConversation() {
@@ -569,6 +583,7 @@
         item.textContent = "No citations yet.";
         citations.appendChild(item);
         question.value = "";
+        conversationHistory = [];
         question.focus();
       }
 
@@ -608,10 +623,11 @@
         scrollToLatest();
 
         try {
+          const history = conversationHistory.slice(-MAX_HISTORY_TURNS);
           const response = await fetch("/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question: submittedQuestion, top_k: 5 }),
+            body: JSON.stringify({ question: submittedQuestion, top_k: 5, history }),
           });
           const contentType = response.headers.get("content-type") || "";
           const payload = contentType.includes("application/json")
@@ -628,12 +644,16 @@
             || typeof payload.answer !== "string"
             || !Array.isArray(payload.citations)
             || typeof payload.retrieved_chunks !== "number"
+            || (payload.status !== undefined && !["answer", "clarification"].includes(payload.status))
           ) {
             throw new Error("The server returned an invalid response.");
           }
 
           appendAssistantMessage(payload);
           updateLatestEvidence(payload);
+          conversationHistory.push({ role: "user", content: submittedQuestion });
+          conversationHistory.push({ role: "assistant", content: payload.answer });
+          conversationHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
         } catch (requestError) {
           error.textContent = requestError instanceof Error ? requestError.message : "Request failed.";
           error.hidden = false;

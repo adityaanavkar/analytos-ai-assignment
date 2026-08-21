@@ -15,13 +15,21 @@ from azure.search.documents.indexes.models import (
     SearchField,
     SearchFieldDataType,
     SearchIndex,
+    SemanticConfiguration,
+    SemanticField,
+    SemanticPrioritizedFields,
+    SemanticSearch,
     SimpleField,
     VectorSearch,
     VectorSearchProfile,
 )
 
 from app.config import Settings, get_settings
-from app.rag.azure import AzureOpenAIAdapter, AzureSearchAdapter
+from app.rag.azure import (
+    SEMANTIC_CONFIGURATION_NAME,
+    AzureOpenAIAdapter,
+    AzureSearchAdapter,
+)
 from app.rag.models import RetrievedChunk
 from ingestion.pdf import chunk_pages, extract_pdf
 
@@ -39,10 +47,51 @@ def build_index_schema(index_name: str) -> SearchIndex:
         fields=[
             SimpleField(name="id", type=SearchFieldDataType.String, key=True),
             SearchableField(name="content", type=SearchFieldDataType.String),
+            SimpleField(
+                name="content_hash",
+                type=SearchFieldDataType.String,
+                filterable=True,
+            ),
+            SimpleField(
+                name="document_id",
+                type=SearchFieldDataType.String,
+                filterable=True,
+            ),
             SearchableField(name="title", type=SearchFieldDataType.String),
             SimpleField(
                 name="source_path",
                 type=SearchFieldDataType.String,
+                filterable=True,
+            ),
+            SimpleField(name="file_type", type=SearchFieldDataType.String, filterable=True),
+            SimpleField(
+                name="department",
+                type=SearchFieldDataType.String,
+                filterable=True,
+                facetable=True,
+            ),
+            SimpleField(
+                name="document_type",
+                type=SearchFieldDataType.String,
+                filterable=True,
+                facetable=True,
+            ),
+            SimpleField(name="version", type=SearchFieldDataType.String, filterable=True),
+            SimpleField(
+                name="effective_from",
+                type=SearchFieldDataType.DateTimeOffset,
+                filterable=True,
+                sortable=True,
+            ),
+            SimpleField(
+                name="effective_to",
+                type=SearchFieldDataType.DateTimeOffset,
+                filterable=True,
+                sortable=True,
+            ),
+            SimpleField(
+                name="is_current",
+                type=SearchFieldDataType.Boolean,
                 filterable=True,
             ),
             SimpleField(
@@ -51,6 +100,23 @@ def build_index_schema(index_name: str) -> SearchIndex:
                 filterable=True,
             ),
             SimpleField(name="section", type=SearchFieldDataType.String, filterable=True),
+            SimpleField(name="sheet_name", type=SearchFieldDataType.String, filterable=True),
+            SimpleField(
+                name="table_number",
+                type=SearchFieldDataType.Int32,
+                filterable=True,
+            ),
+            SimpleField(
+                name="row_number",
+                type=SearchFieldDataType.Int32,
+                filterable=True,
+            ),
+            SearchField(
+                name="allowed_groups",
+                type=SearchFieldDataType.Collection(SearchFieldDataType.String),
+                searchable=False,
+                filterable=True,
+            ),
             SearchField(
                 name="content_vector",
                 type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
@@ -67,6 +133,17 @@ def build_index_schema(index_name: str) -> SearchIndex:
                     algorithm_configuration_name=_ALGORITHM_NAME,
                 )
             ],
+        ),
+        semantic_search=SemanticSearch(
+            configurations=[
+                SemanticConfiguration(
+                    name=SEMANTIC_CONFIGURATION_NAME,
+                    prioritized_fields=SemanticPrioritizedFields(
+                        title_field=SemanticField(field_name="title"),
+                        content_fields=[SemanticField(field_name="content")],
+                    ),
+                )
+            ]
         ),
     )
 

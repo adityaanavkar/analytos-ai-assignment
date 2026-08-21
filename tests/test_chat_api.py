@@ -4,6 +4,8 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.main import ChatCitation, ChatResponse, create_app
+from app.rag.models import ChatResult
+from app.rag.query_analysis import ConversationTurn
 
 
 class StubChatService:
@@ -33,6 +35,53 @@ class FailingChatService:
 
     async def answer(self, *, question: str, top_k: int) -> ChatResponse:
         raise ConnectionError(f"private provider detail for {question} at top_k={top_k}")
+
+
+class HistoryAwareChatService:
+    """Service double for the optional A7 conversation contract."""
+
+    def __init__(self) -> None:
+        self.history: list[ConversationTurn] = []
+
+    async def answer(
+        self,
+        *,
+        question: str,
+        top_k: int,
+        history: list[ConversationTurn] | tuple[ConversationTurn, ...] = (),
+    ) -> ChatResponse:
+        del question, top_k
+        self.history = list(history)
+        return ChatResponse(
+            answer="Which plan do you mean?",
+            citations=[],
+            retrieved_chunks=0,
+            status="clarification",
+            clarification="Which plan do you mean?",
+            rewritten_query="",
+            temporal_intent="unspecified",
+            subqueries=[],
+        )
+
+
+class RagClarificationService:
+    """RAG-shaped service double proving clarification status reaches the API."""
+
+    async def answer(
+        self,
+        *,
+        question: str,
+        top_k: int,
+        history: list[ConversationTurn] | tuple[ConversationTurn, ...] = (),
+    ) -> ChatResult:
+        del question, top_k, history
+        return ChatResult(
+            answer="Which policy do you mean?",
+            citations=(),
+            retrieved_chunks=0,
+            status="clarification",
+            clarification="Which policy do you mean?",
+        )
 
 
 @pytest.mark.asyncio
@@ -101,6 +150,63 @@ async def test_chat_endpoint_reports_unavailable_service() -> None:
 
     assert response.status_code == 503
     assert response.json() == {"detail": "The chat service is not available."}
+
+
+@pytest.mark.asyncio
+async def test_chat_endpoint_forwards_bounded_typed_history_and_a7_fields() -> None:
+    service = HistoryAwareChatService()
+    application = create_app(chat_service_factory=lambda: service)
+
+    async with AsyncClient(
+        transport=ASGITransport(app=application), base_url="http://test"
+    ) as client:
+        response = await client.post(
+            "/chat",
+            json={
+                "question": "What about Standard?",
+                "history": [
+                    {"role": "user", "content": "What is the Enterprise policy?"},
+                    {"role": "assistant", "content": "Enterprise allows cancellation."},
+                ],
+            },
+        )
+
+    assert response.status_code == 200
+    assert [(turn.role, turn.content) for turn in service.history] == [
+        ("user", "What is the Enterprise policy?"),
+        ("assistant", "Enterprise allows cancellation."),
+    ]
+    assert response.json()["status"] == "clarification"
+    assert response.json()["clarification"] == "Which plan do you mean?"
+
+
+@pytest.mark.asyncio
+async def test_chat_endpoint_rejects_history_over_six_turns() -> None:
+    service = HistoryAwareChatService()
+    application = create_app(chat_service_factory=lambda: service)
+    history = [{"role": "user", "content": f"Question {index}"} for index in range(7)]
+
+    async with AsyncClient(
+        transport=ASGITransport(app=application), base_url="http://test"
+    ) as client:
+        response = await client.post("/chat", json={"question": "Next", "history": history})
+
+    assert response.status_code == 422
+    assert service.history == []
+
+
+@pytest.mark.asyncio
+async def test_chat_endpoint_serializes_rag_clarification_status() -> None:
+    application = create_app(chat_service_factory=RagClarificationService)
+
+    async with AsyncClient(
+        transport=ASGITransport(app=application), base_url="http://test"
+    ) as client:
+        response = await client.post("/chat", json={"question": "What is the limit?"})
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "clarification"
+    assert response.json()["clarification"] == "Which policy do you mean?"
 
 
 @pytest.mark.asyncio
