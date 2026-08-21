@@ -1,5 +1,7 @@
 # Permanent RAG evaluation protocol
 
+For the reviewer-facing summary, see [Baseline Versus Improved RAG](BASELINE_VS_IMPROVED.md).
+
 `core_v1.json` is the frozen ten-case regression suite for every version from this milestone onward.
 
 Do not edit or replace its cases after the first recorded run.

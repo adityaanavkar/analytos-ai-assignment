@@ -249,6 +249,7 @@ The most important remaining weakness is CORE-008, where the values were correct
 
 Evaluation evidence:
 
+- [Reviewer-facing baseline versus improved report](evaluation/BASELINE_VS_IMPROVED.md)
 - [Evaluation protocol](evaluation/README.md)
 - [Frozen dataset](evaluation/datasets/core_v1.json)
 - [Frozen baseline and v0.6 raw comparison](evaluation/results/core_v1_baseline_vs_improved_v0_6.json)
