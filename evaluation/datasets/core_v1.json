@@ -1,0 +1,238 @@
+{
+  "dataset_id": "analytos-rag-core",
+  "version": "core-v1",
+  "frozen": true,
+  "description": "Ten immutable core cases used unchanged for every evaluated RAG version.",
+  "cases": [
+    {
+      "id": "CORE-001",
+      "category": "inventory",
+      "answerability": "answerable",
+      "question": "List every document currently in the knowledge base, grouped by department.",
+      "expected_sources": [
+        "KnowledgeBase/Finance/ExpensePolicy.pdf",
+        "KnowledgeBase/Finance/TravelPolicy.docx",
+        "KnowledgeBase/HR/Benefits.pdf",
+        "KnowledgeBase/HR/LeavePolicy.pdf",
+        "KnowledgeBase/IT/PasswordPolicy.docx",
+        "KnowledgeBase/IT/VPNGuide.pdf",
+        "KnowledgeBase/Legal/NDA.docx",
+        "KnowledgeBase/Legal/VendorContract.pdf",
+        "KnowledgeBase/Sales/Discounts.xlsx",
+        "KnowledgeBase/Sales/Pricing2025.pdf",
+        "KnowledgeBase/Sales/Pricing2026.pdf"
+      ],
+      "expected_facts": [
+        "The inventory contains exactly 11 source documents.",
+        "The departments are Finance, HR, IT, Legal, and Sales."
+      ],
+      "expected_keyword_groups": [
+        ["11 documents"],
+        ["ExpensePolicy.pdf"],
+        ["TravelPolicy.docx"],
+        ["Benefits.pdf"],
+        ["LeavePolicy.pdf"],
+        ["PasswordPolicy.docx"],
+        ["VPNGuide.pdf"],
+        ["NDA.docx"],
+        ["VendorContract.pdf"],
+        ["Discounts.xlsx"],
+        ["Pricing2025.pdf"],
+        ["Pricing2026.pdf"]
+      ],
+      "source_check_mode": "answer_text",
+      "citation_requirement": "not_required"
+    },
+    {
+      "id": "CORE-002",
+      "category": "cross_document",
+      "answerability": "answerable",
+      "question": "For a single $3,000 business-travel expense, when must it be submitted, what receipt threshold applies, and who must approve it?",
+      "expected_sources": [
+        "KnowledgeBase/Finance/TravelPolicy.docx",
+        "KnowledgeBase/Finance/ExpensePolicy.pdf"
+      ],
+      "expected_facts": [
+        "Trip expenses must be submitted within 30 calendar days of trip completion.",
+        "An itemized receipt is required for an expense of $25 or more.",
+        "A $3,000 expense requires Department VP approval."
+      ],
+      "expected_keyword_groups": [
+        ["30 calendar days", "within 30 days"],
+        ["$25", "25 or more"],
+        ["department vp"]
+      ],
+      "source_check_mode": "citations",
+      "citation_requirement": "required"
+    },
+    {
+      "id": "CORE-003",
+      "category": "cross_document",
+      "answerability": "answerable",
+      "question": "For a remote employee, what VPN portal and MFA method should be used, and what is the minimum company password length?",
+      "expected_sources": [
+        "KnowledgeBase/IT/VPNGuide.pdf",
+        "KnowledgeBase/IT/PasswordPolicy.docx"
+      ],
+      "expected_facts": [
+        "The VPN portal is vpn.northwindtraders.example.",
+        "Every VPN connection requires an Okta Verify push approval.",
+        "Company passwords must contain at least 12 characters."
+      ],
+      "expected_keyword_groups": [
+        ["vpn.northwindtraders.example"],
+        ["okta verify"],
+        ["12 characters"]
+      ],
+      "source_check_mode": "citations",
+      "citation_requirement": "required"
+    },
+    {
+      "id": "CORE-004",
+      "category": "xlsx_multi_row",
+      "answerability": "answerable",
+      "question": "For 250 OrbitSuite seats on an annual prepaid term, what combined discount and final monthly per-seat price apply, and who approves the deal?",
+      "expected_sources": [
+        "KnowledgeBase/Sales/Discounts.xlsx"
+      ],
+      "expected_facts": [
+        "The 250-seat volume discount is 20%.",
+        "The annual prepaid term discount is 15%.",
+        "The combined discount is 35% and the final price is $42.25 per seat per month.",
+        "A 35% combined discount requires the Chief Revenue Officer and Finance Business Partner."
+      ],
+      "expected_keyword_groups": [
+        ["20%", "20 percent"],
+        ["15%", "15 percent"],
+        ["35%", "0.35"],
+        ["$42.25", "42.25"],
+        ["chief revenue officer"],
+        ["finance business partner"]
+      ],
+      "source_check_mode": "citations",
+      "citation_requirement": "required"
+    },
+    {
+      "id": "CORE-005",
+      "category": "cross_document",
+      "answerability": "answerable",
+      "question": "When does a new full-time employee begin accruing PTO, and when does benefits coverage begin?",
+      "expected_sources": [
+        "KnowledgeBase/HR/LeavePolicy.pdf",
+        "KnowledgeBase/HR/Benefits.pdf"
+      ],
+      "expected_facts": [
+        "PTO accrual begins on the first day of employment.",
+        "Benefits coverage begins on the first day of the month following 30 days of employment."
+      ],
+      "expected_keyword_groups": [
+        ["first day of employment", "first day"],
+        ["first day of the month"],
+        ["30 days"]
+      ],
+      "source_check_mode": "citations",
+      "citation_requirement": "required"
+    },
+    {
+      "id": "CORE-006",
+      "category": "cross_document",
+      "answerability": "answerable",
+      "question": "Compare how long confidentiality obligations survive under the mutual NDA and the vendor agreement, including the rule for trade secrets.",
+      "expected_sources": [
+        "KnowledgeBase/Legal/NDA.docx",
+        "KnowledgeBase/Legal/VendorContract.pdf"
+      ],
+      "expected_facts": [
+        "The NDA obligation survives for three years following disclosure.",
+        "The vendor agreement obligation survives termination for five years.",
+        "Both protect qualifying trade secrets indefinitely."
+      ],
+      "expected_keyword_groups": [
+        ["three years", "3 years"],
+        ["five years", "5 years"],
+        ["indefinitely"],
+        ["trade secret"]
+      ],
+      "source_check_mode": "citations",
+      "citation_requirement": "required"
+    },
+    {
+      "id": "CORE-007",
+      "category": "current_version",
+      "answerability": "answerable",
+      "question": "What are the current 2026 Professional tier monthly list price and API limit?",
+      "expected_sources": [
+        "KnowledgeBase/Sales/Pricing2026.pdf"
+      ],
+      "expected_facts": [
+        "The Professional tier costs $65 per seat per month in 2026.",
+        "The Professional tier includes 100,000 API calls per month."
+      ],
+      "expected_keyword_groups": [
+        ["$65", "65 per seat"],
+        ["100k", "100,000"]
+      ],
+      "source_check_mode": "citations",
+      "citation_requirement": "required"
+    },
+    {
+      "id": "CORE-008",
+      "category": "version_conflict",
+      "answerability": "answerable",
+      "question": "Compare the Starter monthly list price and Advanced Analytics add-on price in the 2025 and 2026 rate cards.",
+      "expected_sources": [
+        "KnowledgeBase/Sales/Pricing2025.pdf",
+        "KnowledgeBase/Sales/Pricing2026.pdf"
+      ],
+      "expected_facts": [
+        "Starter increased from $29 in 2025 to $32 in 2026.",
+        "Advanced Analytics increased from $12 in 2025 to $14 in 2026."
+      ],
+      "expected_keyword_groups": [
+        ["$29", "Starter tier was 29"],
+        ["$32", "Starter tier is 32"],
+        ["$12", "Advanced Analytics was 12"],
+        ["$14", "Advanced Analytics is 14"]
+      ],
+      "source_check_mode": "citations",
+      "citation_requirement": "required"
+    },
+    {
+      "id": "CORE-009",
+      "category": "missing_information",
+      "answerability": "unanswerable",
+      "question": "What pet insurance provider does Northwind use and how much is the monthly premium?",
+      "expected_sources": [],
+      "expected_facts": [
+        "The knowledge base contains no pet insurance provider or premium information.",
+        "The assistant should refuse to invent an answer."
+      ],
+      "expected_keyword_groups": [
+        ["could not find", "not enough supporting information", "not in the knowledge base"]
+      ],
+      "source_check_mode": "citations",
+      "citation_requirement": "forbidden"
+    },
+    {
+      "id": "CORE-010",
+      "category": "xlsx_cross_section",
+      "answerability": "answerable",
+      "question": "Can the Year 1 startup discount stack with volume or term discounts, what is its rate, and how often is eligibility checked?",
+      "expected_sources": [
+        "KnowledgeBase/Sales/Discounts.xlsx"
+      ],
+      "expected_facts": [
+        "The Year 1 startup discount is 30%.",
+        "Special program discounts do not stack with volume or term discounts.",
+        "Eligibility is re-verified annually."
+      ],
+      "expected_keyword_groups": [
+        ["30%", "0.3"],
+        ["do not stack", "does not stack"],
+        ["annual", "annually"]
+      ],
+      "source_check_mode": "citations",
+      "citation_requirement": "required"
+    }
+  ]
+}

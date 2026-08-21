@@ -27,9 +27,10 @@ The first live end-to-end version is running.
 - The FastAPI service and browser UI answer questions through hybrid retrieval and grounded generation.
 - Document list, exact count, and department inventory questions use Search metadata instead of model inference.
 - Greetings, unsupported questions, citation validation, and JSON error handling have regression coverage.
-- The current quality suite contains 63 passing tests plus Ruff, formatting, strict mypy, Bicep, and dependency checks.
+- A separate 53-chunk vector-only baseline index and permanent ten-case live evaluation are now reproducible.
+- The current quality suite contains 79 passing tests plus Ruff and strict mypy checks.
 
-The baseline comparison, advanced query analysis, retrieval-time access control, formal evaluation, production architecture, and submission package remain to be implemented.
+The first baseline comparison is complete, while advanced query analysis, retrieval-time access control, the full 20-case evaluation, production architecture, and submission package remain to be implemented.
 
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the live checklist,
 acceptance evidence, and engineering decision journal. That tracker must be
@@ -161,11 +162,11 @@ Azure OpenAI generates a grounded answer
 FastAPI returns the answer, validated citations, and diagnostics
 ```
 
-The baseline will use simpler fixed-size chunks and vector-only retrieval. The
-improved version will add structure-aware chunking, hybrid keyword/vector
-retrieval, version handling, query rewriting, evidence checks, citations, and
-retrieval-time department access control. These are planned capabilities, not
-current claims.
+The baseline uses fixed 120-word chunks with 20-word overlap and vector-only fixed Top-5 retrieval in a separate Azure Search index.
+
+The current improved version uses structure-aware chunks and hybrid keyword/vector retrieval, but its first measured score is only 141/160 compared with the baseline's 140/160.
+
+Version handling, query rewriting, retrieval-time department access control, and broader evaluation remain planned work rather than current claims.
 
 ## Azure account and cost safety
 
@@ -187,14 +188,14 @@ when billable resources are deployed or used.
 
 ## Repository guide
 
-- `app/` — FastAPI application and runtime configuration.
-- `KnowledgeBase/` — supplied documents used by the assignment.
-- `ingestion/` — future parsing, chunking, and indexing code.
-- `evaluation/` — future evaluation cases, metrics, and reports.
-- `infra/` — future Azure Bicep infrastructure.
-- `architecture/` — future system diagrams and design artifacts.
-- `tests/` — automated tests.
-- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — authoritative progress
+- `app/` - FastAPI application and runtime configuration.
+- `KnowledgeBase/` - supplied documents used by the assignment.
+- `ingestion/` - PDF, DOCX, and XLSX parsing and structure-aware chunking code.
+- `evaluation/` - the permanent ten-case dataset, live runner, raw outputs, and manual judgments.
+- `infra/` - reproducible Azure Bicep infrastructure.
+- `architecture/` - future system diagrams and design artifacts.
+- `tests/` - automated tests.
+- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) - authoritative progress
   tracker and decision journal.
 
 ## Git basics

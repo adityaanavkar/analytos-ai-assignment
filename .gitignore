@@ -14,7 +14,6 @@ htmlcov/
 # Generated RAG artifacts
 .cache/
 artifacts/
-evaluation/results/
 
 # Editors and operating systems
 .idea/

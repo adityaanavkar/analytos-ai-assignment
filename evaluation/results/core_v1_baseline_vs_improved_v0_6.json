@@ -1,0 +1,695 @@
+{
+  "dataset": {
+    "id": "analytos-rag-core",
+    "version": "core-v1",
+    "case_count": 10
+  },
+  "metadata": {
+    "run_utc": "2026-08-21T04:49:46.361485+00:00",
+    "git_commit": "34fc956aa5e87d6803fe9556afaaf1c6a510d066",
+    "dataset_sha256": "9a76a255bd500a6f8a602a633d9c968b7bcaaff89a8b8bf279fa2c6684844f64",
+    "corpus_fingerprint": "ba1733838a948e08093db141458d5b7e29302e9b612b9d2108556c1d53b16313",
+    "azure_search_baseline_index": "enterprise-kb-baseline-v1",
+    "azure_search_improved_index": "enterprise-kb-improved-v1",
+    "embedding_deployment": "text-embedding-3-small",
+    "generation_deployment": "gpt-4-1-mini",
+    "baseline_retrieval": "vector-only fixed Top 5",
+    "improved_retrieval": "hybrid retrieval configured by app.rag",
+    "scoring": "Manual only. Four dimensions scored 0-4, maximum 16 per case."
+  },
+  "pipelines": [
+    {
+      "pipeline": "baseline",
+      "outputs": [
+        {
+          "case_id": "CORE-001",
+          "question": "List every document currently in the knowledge base, grouped by department.",
+          "answer": "The documents currently in the knowledge base, grouped by department, are:\n\n- People Operations / HR:\n  - LeavePolicy (two documents related to leave and holidays) [baseline-6273ff4671e20f1844cdf875], [baseline-053fd1d172d3959a52f0dee2]\n\n- Finance / Expense Management:\n  - ExpensePolicy [baseline-27052df2e7e3edb9997077ac]\n\n- Sales Operations:\n  - Discounts [baseline-a27eb991114e68b9727cef0d]\n  - Pricing2025 [baseline-710404a50caf728cd0788f54]\n\nNo other departments or documents are mentioned in the provided evidence.",
+          "citations": [
+            {
+              "chunk_id": "baseline-6273ff4671e20f1844cdf875",
+              "source": "KnowledgeBase/HR/LeavePolicy.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-053fd1d172d3959a52f0dee2",
+              "source": "KnowledgeBase/HR/LeavePolicy.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-27052df2e7e3edb9997077ac",
+              "source": "KnowledgeBase/Finance/ExpensePolicy.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-a27eb991114e68b9727cef0d",
+              "source": "KnowledgeBase/Sales/Discounts.xlsx",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-710404a50caf728cd0788f54",
+              "source": "KnowledgeBase/Sales/Pricing2025.pdf",
+              "page": null,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 6596.61,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-002",
+          "question": "For a single $3,000 business-travel expense, when must it be submitted, what receipt threshold applies, and who must approve it?",
+          "answer": "For a single $3,000 business-travel expense:\n\n- It must be submitted through the ExpensePath system within 30 calendar days of the trip completion or purchase date [[baseline-27052df2e7e3edb9997077ac], [baseline-d91f2f8fe79da2b3930a9cf8]].\n- An itemized receipt is required because it is over the $25 threshold for receipts [[baseline-2bc63821de9649e19b312a3a], [baseline-27052df2e7e3edb9997077ac], [baseline-d91f2f8fe79da2b3930a9cf8]].\n- Approval must come from the Department VP since the amount is between $2,500 and $10,000 according to the approval matrix [[baseline-e0bd95c1f0256f9c9cf8c826]].\n\nTherefore, the $3,000 business-travel expense must be submitted within 30 days with an itemized receipt, and approved by the Department VP.",
+          "citations": [
+            {
+              "chunk_id": "baseline-27052df2e7e3edb9997077ac",
+              "source": "KnowledgeBase/Finance/ExpensePolicy.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-d91f2f8fe79da2b3930a9cf8",
+              "source": "KnowledgeBase/Finance/TravelPolicy.docx",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-2bc63821de9649e19b312a3a",
+              "source": "KnowledgeBase/Finance/ExpensePolicy.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-e0bd95c1f0256f9c9cf8c826",
+              "source": "KnowledgeBase/Finance/ExpensePolicy.pdf",
+              "page": null,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 4586.86,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-003",
+          "question": "For a remote employee, what VPN portal and MFA method should be used, and what is the minimum company password length?",
+          "answer": "- VPN portal for remote employees: NorthLink VPN, which requires MFA for every connection and uses split tunneling to route only internal Company resource traffic through the VPN tunnel [baseline-529c15849d5ba91a2d1eaee6].\n\n- MFA method: Okta Verify is the primary required MFA method for all Company accounts, with push notification via Okta Verify as the preferred factor. Hardware security keys (FIDO2 / YubiKey) are required for IT Administrator accounts. Time-based one-time passcode (TOTP) authenticator apps are approved, and SMS text message is permitted only as a fallback method, not primary [baseline-6cc0f86f24d155085d7c85ec].\n\n- Minimum company password length: 12 characters minimum length for all Company account passwords [baseline-884434f469a9645b7a58be99].",
+          "citations": [
+            {
+              "chunk_id": "baseline-529c15849d5ba91a2d1eaee6",
+              "source": "KnowledgeBase/IT/VPNGuide.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-6cc0f86f24d155085d7c85ec",
+              "source": "KnowledgeBase/IT/PasswordPolicy.docx",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-884434f469a9645b7a58be99",
+              "source": "KnowledgeBase/IT/PasswordPolicy.docx",
+              "page": null,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 3808.37,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-004",
+          "question": "For 250 OrbitSuite seats on an annual prepaid term, what combined discount and final monthly per-seat price apply, and who approves the deal?",
+          "answer": "For 250 OrbitSuite seats on an annual prepaid term, the volume discount is 20% (0.2) and the term discount for annual prepaid is 15% (0.15). These discounts combine to a total discount of 35% (0.2 + 0.15 = 0.35), which is below the 40% cap for combined discounts without CFO exception. The list price per seat per month is $65, so the final monthly per-seat price after the combined discount is:\n\n$65 \u00d7 (1 - 0.35) = $42.25\n\nThe combined discount and final price are derived from the discount schedule and stacking example, which shows volume discounts apply automatically based on seat count and term discounts apply to the full contract value, combined but capped at 40% total without CFO exception [baseline-63844a607a13febce5dc7efd], [baseline-3b2ca7e493c2cab50613ac1b].\n\nRegarding approval, combined discounts capped at 40% do not require CFO exception. The 'Approval Thresholds' tab (mentioned but not provided) would specify the required sign-off level at each discount band. Since the combined discount here is 35%, below the 40% cap, it implies no CFO exception is needed, but the exact approver is not specified in the provided evidence [baseline-3b2ca7e493c2cab50613ac1b].\n\nIn summary:\n- Combined discount: 35% (20% volume + 15% term)\n- Final monthly per-seat price: $42.25\n- Approval: No CFO exception needed; exact approver not specified in the evidence.",
+          "citations": [
+            {
+              "chunk_id": "baseline-63844a607a13febce5dc7efd",
+              "source": "KnowledgeBase/Sales/Discounts.xlsx",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-3b2ca7e493c2cab50613ac1b",
+              "source": "KnowledgeBase/Sales/Discounts.xlsx",
+              "page": null,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 4288.91,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-005",
+          "question": "When does a new full-time employee begin accruing PTO, and when does benefits coverage begin?",
+          "answer": "A new full-time employee begins accruing PTO on a bi-weekly basis starting on their first day of employment [baseline-bd7f892ff786de9a3c1113de]. Benefits coverage begins on the first day of the month following 30 days of employment [baseline-8de7b2f78f42bfaf691ff48f].",
+          "citations": [
+            {
+              "chunk_id": "baseline-bd7f892ff786de9a3c1113de",
+              "source": "KnowledgeBase/HR/LeavePolicy.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-8de7b2f78f42bfaf691ff48f",
+              "source": "KnowledgeBase/HR/Benefits.pdf",
+              "page": null,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 2468.39,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-006",
+          "question": "Compare how long confidentiality obligations survive under the mutual NDA and the vendor agreement, including the rule for trade secrets.",
+          "answer": "The confidentiality obligations under the mutual NDA survive for three (3) years following disclosure of the relevant Confidential Information. However, for information that qualifies as a trade secret under applicable law, the confidentiality obligations survive indefinitely. The NDA itself remains in effect for two (2) years from the Effective Date, but the confidentiality obligations extend beyond that term as described [baseline-db344f932ef888a9e4782c8b].\n\nIn contrast, under the vendor agreement, each Party's confidentiality obligation survives termination of the Agreement for a period of five (5) years, or indefinitely for trade secrets. The vendor agreement requires each Party to protect the other Party's Confidential Information with at least reasonable care and to use such information solely to perform obligations under the Agreement [baseline-b651fae76bf8910b719f6644].\n\nIn summary:\n- Mutual NDA: confidentiality obligations survive 3 years after disclosure, indefinitely for trade secrets.\n- Vendor Agreement: confidentiality obligations survive 5 years after termination, indefinitely for trade secrets.\n\nThus, the vendor agreement imposes a longer fixed duration (5 years vs. 3 years) for confidentiality obligations post-termination/disclosure, but both agreements provide for indefinite confidentiality obligations for trade secrets under applicable law.",
+          "citations": [
+            {
+              "chunk_id": "baseline-db344f932ef888a9e4782c8b",
+              "source": "KnowledgeBase/Legal/NDA.docx",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-b651fae76bf8910b719f6644",
+              "source": "KnowledgeBase/Legal/VendorContract.pdf",
+              "page": null,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 3384.11,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-007",
+          "question": "What are the current 2026 Professional tier monthly list price and API limit?",
+          "answer": "The current 2026 Professional tier monthly list price is $65 per seat per month, with a minimum of 10 seats required. The API limit for the Professional tier has been raised to 100,000 calls per month. This is an increase from the 2025 limit of 50,000 calls per month. The Professional tier also includes email and chat support with a next-business-day SLA. These details are from the 2026 pricing documents which supersede the 2025 rate card and reflect the updated pricing and API limits effective January 1, 2026 [baseline-da612efc54d5ccc70a147f16], [baseline-1996dc64f8221d3ee8960e0c], [baseline-01694cc1cb8c211d8196fb55].",
+          "citations": [
+            {
+              "chunk_id": "baseline-da612efc54d5ccc70a147f16",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-1996dc64f8221d3ee8960e0c",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-01694cc1cb8c211d8196fb55",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": null,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 3857.05,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-008",
+          "question": "Compare the Starter monthly list price and Advanced Analytics add-on price in the 2025 and 2026 rate cards.",
+          "answer": "The Starter monthly list price and Advanced Analytics add-on price in the 2025 and 2026 rate cards are as follows:\n\n- Starter monthly list price:\n  - 2025: $29 per seat per month with a minimum of 5 seats [baseline-710404a50caf728cd0788f54].\n  - 2026: The exact Starter tier price is not explicitly stated in the 2026 evidence, but the 2026 rate card mentions an approximate 8\u201310% increase across all tiers from 2025 prices [baseline-1996dc64f8221d3ee8960e0c]. Applying an 8\u201310% increase to the 2025 Starter price of $29 would estimate the 2026 Starter price to be approximately $31.32 to $31.90 per seat per month.\n\n- Advanced Analytics add-on price:\n  - 2025: +$12 per seat per month [baseline-8560beec9dbb6bec5c8b4030].\n  - 2026: +$14 per seat per month [baseline-01694cc1cb8c211d8196fb55].\n\nIn summary, from 2025 to 2026, the Advanced Analytics add-on price increased from $12 to $14 per seat per month. The Starter monthly list price increased approximately 8\u201310% from $29, estimating around $31.32 to $31.90 per seat per month in 2026, though the exact 2026 Starter price is not explicitly provided in the evidence.",
+          "citations": [
+            {
+              "chunk_id": "baseline-710404a50caf728cd0788f54",
+              "source": "KnowledgeBase/Sales/Pricing2025.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-1996dc64f8221d3ee8960e0c",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-8560beec9dbb6bec5c8b4030",
+              "source": "KnowledgeBase/Sales/Pricing2025.pdf",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-01694cc1cb8c211d8196fb55",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": null,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 3883.76,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-009",
+          "question": "What pet insurance provider does Northwind use and how much is the monthly premium?",
+          "answer": "I could not find enough supporting information in the knowledge base to answer that.",
+          "citations": [],
+          "retrieved_chunks": 5,
+          "latency_ms": 2121.33,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-010",
+          "question": "Can the Year 1 startup discount stack with volume or term discounts, what is its rate, and how often is eligibility checked?",
+          "answer": "The Year 1 startup discount rate is 30% (0.3) off the list price per seat per month. It applies to companies incorporated under 3 years with total funding raised under $5M, verified by Sales Operations. The illustrative price after this discount is $45.5 per seat per month from a $65 list price [baseline-42f694900fc412e29c5ece21].\n\nSpecial program discounts, which include the Year 1 startup discount, do not stack with volume or term discounts. Only the highest applicable single discount applies [baseline-42f694900fc412e29c5ece21], [baseline-a27eb991114e68b9727cef0d].\n\nEligibility for special program discounts, including the Year 1 startup discount, is subject to annual re-verification [baseline-a27eb991114e68b9727cef0d].\n\nIn summary:\n- The Year 1 startup discount is 30%.\n- It cannot be combined (stacked) with volume or term discounts; only the highest discount applies.\n- Eligibility is checked annually.",
+          "citations": [
+            {
+              "chunk_id": "baseline-42f694900fc412e29c5ece21",
+              "source": "KnowledgeBase/Sales/Discounts.xlsx",
+              "page": null,
+              "section": null
+            },
+            {
+              "chunk_id": "baseline-a27eb991114e68b9727cef0d",
+              "source": "KnowledgeBase/Sales/Discounts.xlsx",
+              "page": null,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 4279.69,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        }
+      ]
+    },
+    {
+      "pipeline": "improved",
+      "outputs": [
+        {
+          "case_id": "CORE-001",
+          "question": "List every document currently in the knowledge base, grouped by department.",
+          "answer": "11 documents are indexed:\n- ExpensePolicy - KnowledgeBase/Finance/ExpensePolicy.pdf\n- TravelPolicy - KnowledgeBase/Finance/TravelPolicy.docx\n- Benefits - KnowledgeBase/HR/Benefits.pdf\n- LeavePolicy - KnowledgeBase/HR/LeavePolicy.pdf\n- PasswordPolicy - KnowledgeBase/IT/PasswordPolicy.docx\n- VPNGuide - KnowledgeBase/IT/VPNGuide.pdf\n- NDA - KnowledgeBase/Legal/NDA.docx\n- VendorContract - KnowledgeBase/Legal/VendorContract.pdf\n- Discounts - KnowledgeBase/Sales/Discounts.xlsx\n- Pricing2025 - KnowledgeBase/Sales/Pricing2025.pdf\n- Pricing2026 - KnowledgeBase/Sales/Pricing2026.pdf",
+          "citations": [],
+          "retrieved_chunks": 0,
+          "latency_ms": 1071.9,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-002",
+          "question": "For a single $3,000 business-travel expense, when must it be submitted, what receipt threshold applies, and who must approve it?",
+          "answer": "For a single $3,000 business-travel expense:\n\n- It must be submitted through ExpensePath within 30 calendar days of trip completion or purchase date [[d212a77210796894084931b6], [5f945465a7754788082abe40]].\n- An itemized receipt is required because the expense is over $25; credit card statements alone are not sufficient [[d212a77210796894084931b6], [bd46f782cc44ff7ebdcb3df0], [5f945465a7754788082abe40]].\n- Approval must come from the Department VP, since the amount is between $2,500 and $10,000 [[1edd3c141911fe0932b74fe8]].\n\nTherefore, the $3,000 expense must be submitted within 30 days with an itemized receipt, and approved by the Department VP.",
+          "citations": [
+            {
+              "chunk_id": "d212a77210796894084931b6",
+              "source": "KnowledgeBase/Finance/ExpensePolicy.pdf",
+              "page": 1,
+              "section": null
+            },
+            {
+              "chunk_id": "5f945465a7754788082abe40",
+              "source": "KnowledgeBase/Finance/TravelPolicy.docx",
+              "page": null,
+              "section": "8. Reimbursement Process"
+            },
+            {
+              "chunk_id": "bd46f782cc44ff7ebdcb3df0",
+              "source": "KnowledgeBase/Finance/ExpensePolicy.pdf",
+              "page": 1,
+              "section": null
+            },
+            {
+              "chunk_id": "1edd3c141911fe0932b74fe8",
+              "source": "KnowledgeBase/Finance/ExpensePolicy.pdf",
+              "page": 2,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 4427.27,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-003",
+          "question": "For a remote employee, what VPN portal and MFA method should be used, and what is the minimum company password length?",
+          "answer": "The VPN portal that should be used by a remote employee is the Company VPN portal. The MFA method required is Okta Verify as the primary method. The minimum company password length is 12 characters.\n\nThis is based on the following evidence:\n- MFA is required for all Company accounts without exception, using Okta Verify as the primary method [5a40c9e1d1970186f4570af1].\n- All Company account passwords must meet the following minimum requirements, including a minimum length of 12 characters [c6e6503cf1a59cb8cfb00c9c], [03359738ea2ed809d589b2ad].",
+          "citations": [
+            {
+              "chunk_id": "5a40c9e1d1970186f4570af1",
+              "source": "KnowledgeBase/IT/PasswordPolicy.docx",
+              "page": null,
+              "section": "4. Multi-Factor Authentication (MFA)"
+            },
+            {
+              "chunk_id": "c6e6503cf1a59cb8cfb00c9c",
+              "source": "KnowledgeBase/IT/PasswordPolicy.docx",
+              "page": null,
+              "section": "2. Password Requirements"
+            },
+            {
+              "chunk_id": "03359738ea2ed809d589b2ad",
+              "source": "KnowledgeBase/IT/PasswordPolicy.docx",
+              "page": null,
+              "section": "2. Password Requirements"
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 2623.02,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-004",
+          "question": "For 250 OrbitSuite seats on an annual prepaid term, what combined discount and final monthly per-seat price apply, and who approves the deal?",
+          "answer": "The evidence does not provide the exact combined discount and final monthly per-seat price specifically for 250 OrbitSuite seats on an annual prepaid term. However, some relevant details are available:\n\n- Annual prepaid contracts receive a 15% discount versus monthly billing [9f801006fc462429d727bf54].\n- There are term discounts for longer prepaid terms (2-year prepaid gets 22% discount, 3-year prepaid gets 28% discount), but these are not directly applicable to a 1-year prepaid term [98ad427e63823be9670a9fd3], [04513c1e2b1f163695c94334].\n- The standard contract term is 12 months with auto-renewal [9f801006fc462429d727bf54].\n- Pricing documents mention list prices and tiers but do not specify the exact per-seat price for 250 seats or the approval authority for such deals [a1805a4feef8fae736dca240], [65422015aa4507b1daeac6b5].\n\nNo information is given about who approves the deal for 250 seats.\n\nTherefore, the combined discount for an annual prepaid term is a 15% discount off monthly billing prices, but the final monthly per-seat price for 250 seats is not specified. Also, the approver of the deal is not mentioned in the provided evidence.",
+          "citations": [
+            {
+              "chunk_id": "9f801006fc462429d727bf54",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": 2,
+              "section": null
+            },
+            {
+              "chunk_id": "98ad427e63823be9670a9fd3",
+              "source": "KnowledgeBase/Sales/Discounts.xlsx",
+              "page": null,
+              "section": "Term Discounts row 7"
+            },
+            {
+              "chunk_id": "04513c1e2b1f163695c94334",
+              "source": "KnowledgeBase/Sales/Discounts.xlsx",
+              "page": null,
+              "section": "Term Discounts row 8"
+            },
+            {
+              "chunk_id": "a1805a4feef8fae736dca240",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": 1,
+              "section": null
+            },
+            {
+              "chunk_id": "65422015aa4507b1daeac6b5",
+              "source": "KnowledgeBase/Sales/Pricing2025.pdf",
+              "page": 1,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 4442.92,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-005",
+          "question": "When does a new full-time employee begin accruing PTO, and when does benefits coverage begin?",
+          "answer": "A new full-time employee begins accruing PTO on a bi-weekly basis starting on their first day of employment. Benefits coverage begins on the first day of the month following 30 days of employment. This means that while PTO accrual starts immediately, benefits coverage has a waiting period until the start of the next month after the employee has completed 30 days of work [[c3768cf1eafd8969edc59755], [97e303aa98fc2d2307730e17]].",
+          "citations": [
+            {
+              "chunk_id": "c3768cf1eafd8969edc59755",
+              "source": "KnowledgeBase/HR/LeavePolicy.pdf",
+              "page": 1,
+              "section": null
+            },
+            {
+              "chunk_id": "97e303aa98fc2d2307730e17",
+              "source": "KnowledgeBase/HR/Benefits.pdf",
+              "page": 1,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 2059.37,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-006",
+          "question": "Compare how long confidentiality obligations survive under the mutual NDA and the vendor agreement, including the rule for trade secrets.",
+          "answer": "The confidentiality obligations under the mutual NDA survive for three (3) years following disclosure of the relevant Confidential Information, or indefinitely if the information qualifies as a trade secret under applicable law [3f30108b38ffad99a2b4f6ed].\n\nIn contrast, under the vendor agreement, the confidentiality obligations survive termination of the agreement for a period of five (5) years, or indefinitely for trade secrets [696e28b9bf84389120eaf14b].\n\nIn summary:\n- Mutual NDA: confidentiality obligations last 3 years after disclosure, indefinite for trade secrets.\n- Vendor agreement: confidentiality obligations last 5 years after termination, indefinite for trade secrets.",
+          "citations": [
+            {
+              "chunk_id": "3f30108b38ffad99a2b4f6ed",
+              "source": "KnowledgeBase/Legal/NDA.docx",
+              "page": null,
+              "section": "4. Term"
+            },
+            {
+              "chunk_id": "696e28b9bf84389120eaf14b",
+              "source": "KnowledgeBase/Legal/VendorContract.pdf",
+              "page": 1,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 3045.66,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-007",
+          "question": "What are the current 2026 Professional tier monthly list price and API limit?",
+          "answer": "The current 2026 Professional tier monthly list price is $65 per seat per month, with a minimum of 10 seats required. The API limit for the Professional tier has been raised to 100,000 calls per month in 2026, up from 50,000 calls per month in 2025. This information is confirmed by the 2026 pricing details showing the Professional tier price and API limit, as well as the note about the API limit increase from 50k to 100k calls/month for the Professional tier [a1805a4feef8fae736dca240], [602a618bbbf66fae2ca344df].",
+          "citations": [
+            {
+              "chunk_id": "a1805a4feef8fae736dca240",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": 1,
+              "section": null
+            },
+            {
+              "chunk_id": "602a618bbbf66fae2ca344df",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": 1,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 2496.57,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-008",
+          "question": "Compare the Starter monthly list price and Advanced Analytics add-on price in the 2025 and 2026 rate cards.",
+          "answer": "The Starter monthly list price and Advanced Analytics add-on price for 2025 and 2026 are as follows:\n\n- Starter monthly list price:\n  - 2025: $29 per seat per month [65422015aa4507b1daeac6b5]\n  - 2026: The 2026 rate card indicates an approximate 8\u201310% increase across all tiers, so the Starter price would be about $31.32 to $31.90 per seat per month (8\u201310% increase on $29) [a1805a4feef8fae736dca240]. However, the exact 2026 Starter price is not explicitly stated in the evidence.\n\n- Advanced Analytics add-on price:\n  - 2025: +$12 per seat per month [2b1731db8711fe6bbe8d1344]\n  - 2026: +$14 per seat per month [9f801006fc462429d727bf54]\n\nIn summary, the Starter monthly list price increased approximately 8\u201310% from $29 in 2025 to about $31.32\u2013$31.90 in 2026, and the Advanced Analytics add-on price increased from $12 to $14 per seat per month from 2025 to 2026.",
+          "citations": [
+            {
+              "chunk_id": "65422015aa4507b1daeac6b5",
+              "source": "KnowledgeBase/Sales/Pricing2025.pdf",
+              "page": 1,
+              "section": null
+            },
+            {
+              "chunk_id": "a1805a4feef8fae736dca240",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": 1,
+              "section": null
+            },
+            {
+              "chunk_id": "2b1731db8711fe6bbe8d1344",
+              "source": "KnowledgeBase/Sales/Pricing2025.pdf",
+              "page": 1,
+              "section": null
+            },
+            {
+              "chunk_id": "9f801006fc462429d727bf54",
+              "source": "KnowledgeBase/Sales/Pricing2026.pdf",
+              "page": 2,
+              "section": null
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 4252.19,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-009",
+          "question": "What pet insurance provider does Northwind use and how much is the monthly premium?",
+          "answer": "I could not find enough supporting information in the knowledge base to answer that.",
+          "citations": [],
+          "retrieved_chunks": 5,
+          "latency_ms": 1921.04,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        },
+        {
+          "case_id": "CORE-010",
+          "question": "Can the Year 1 startup discount stack with volume or term discounts, what is its rate, and how often is eligibility checked?",
+          "answer": "The Year 1 startup discount cannot stack with volume or term discounts. According to the note in the Special Programs sheet, special program discounts do not stack with volume or term discounts; only the highest applicable single discount applies [cb290a678b327badeea3de8e].\n\nThe rate of the Year 1 startup discount is 30% (0.3) off [fafa7955cce5f37b788fd343].\n\nEligibility for the Year 1 startup discount is checked annually, as all special program accounts are subject to annual re-verification of eligibility [cb290a678b327badeea3de8e].\n\nIn summary:\n- The Year 1 startup discount rate is 30%.\n- It does not stack with volume or term discounts.\n- Eligibility is verified annually.",
+          "citations": [
+            {
+              "chunk_id": "cb290a678b327badeea3de8e",
+              "source": "KnowledgeBase/Sales/Discounts.xlsx",
+              "page": null,
+              "section": "Special Programs row 10"
+            },
+            {
+              "chunk_id": "fafa7955cce5f37b788fd343",
+              "source": "KnowledgeBase/Sales/Discounts.xlsx",
+              "page": null,
+              "section": "Special Programs row 7"
+            }
+          ],
+          "retrieved_chunks": 5,
+          "latency_ms": 2875.34,
+          "error": null,
+          "manual_judgment": {
+            "correctness_0_to_4": null,
+            "completeness_0_to_4": null,
+            "grounding_0_to_4": null,
+            "citation_quality_0_to_4": null,
+            "total_0_to_16": null,
+            "judge_notes": null
+          }
+        }
+      ]
+    }
+  ]
+}

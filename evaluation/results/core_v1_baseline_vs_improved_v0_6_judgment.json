@@ -1,0 +1,34 @@
+{
+  "judge": "Staff-level manual review against core-v1 expected facts and sources",
+  "rubric": {
+    "dimensions": ["correctness", "completeness", "grounding", "citation_quality"],
+    "scale": "0-4 per dimension; 16 maximum per case",
+    "baseline_total": 140,
+    "improved_total": 141,
+    "maximum": 160
+  },
+  "baseline": {
+    "CORE-001": [1, 1, 3, 2, 7, "Returned only 5 of 11 files and mistook two LeavePolicy chunks for two documents."],
+    "CORE-002": [4, 4, 4, 4, 16, "All three facts and both required sources were correct."],
+    "CORE-003": [3, 2, 4, 3, 12, "Correct MFA family and password length, but omitted the exact portal URL and did not clearly state the VPN-specific Okta push requirement."],
+    "CORE-004": [3, 3, 4, 3, 13, "Correct discount components, arithmetic, and price, but failed to retrieve the approval row and therefore omitted the CRO plus Finance Business Partner."],
+    "CORE-005": [4, 4, 4, 4, 16, "Complete and correctly cited."],
+    "CORE-006": [4, 4, 4, 4, 16, "Complete comparison with both fixed periods and indefinite trade-secret rule."],
+    "CORE-007": [4, 4, 4, 4, 16, "Correct 2026 price and API limit with current source."],
+    "CORE-008": [3, 3, 3, 3, 12, "Correctly reported three prices but estimated the 2026 Starter value instead of retrieving the exact $32 fact."],
+    "CORE-009": [4, 4, 4, 4, 16, "Correct refusal with no citations."],
+    "CORE-010": [4, 4, 4, 4, 16, "Complete spreadsheet answer with correct citations."]
+  },
+  "improved": {
+    "CORE-001": [4, 3, 4, 4, 15, "Listed all 11 files and their department paths, but did not explicitly group them under department headings."],
+    "CORE-002": [4, 4, 4, 4, 16, "All three facts and both required sources were correct."],
+    "CORE-003": [3, 2, 4, 2, 11, "Correct MFA and password length, but omitted the exact VPN portal URL and returned no VPNGuide citation."],
+    "CORE-004": [1, 1, 3, 2, 7, "Retrieved the wrong spreadsheet/pricing fragments, missed the 20% volume row, final $42.25 price, and approval authority."],
+    "CORE-005": [4, 4, 4, 4, 16, "Complete and correctly cited."],
+    "CORE-006": [4, 4, 4, 4, 16, "Complete comparison with both fixed periods and indefinite trade-secret rule."],
+    "CORE-007": [4, 4, 4, 4, 16, "Correct 2026 price and API limit with current source."],
+    "CORE-008": [3, 3, 3, 3, 12, "Correctly reported three prices but estimated the 2026 Starter value instead of retrieving the exact $32 fact."],
+    "CORE-009": [4, 4, 4, 4, 16, "Correct refusal with no citations."],
+    "CORE-010": [4, 4, 4, 4, 16, "Complete spreadsheet answer with correct citations."]
+  }
+}

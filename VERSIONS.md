@@ -116,3 +116,206 @@ The largest remaining production gap is retrieval-time departmental access contr
 After the active chat-first UI work, the recommended engineering milestone is A5, which must freeze a vector-only baseline and preserve immutable measured results before improved retrieval is evaluated.
 
 `IMPLEMENTATION_PLAN.md` remains the source of truth for action status, acceptance criteria, and detailed completion evidence.
+
+## Permanent ten-case evaluation protocol
+
+Starting with v0.6, every completed RAG version must run the unchanged `evaluation/datasets/core_v1.json` suite before the version is declared finished.
+
+The suite contains exactly ten stable cases covering corpus inventory, cross-document synthesis, PDF and DOCX facts, XLSX multi-row retrieval, XLSX cross-section retrieval, current pricing, conflicting yearly versions, and missing information.
+
+Every run must preserve the dataset hash, corpus fingerprint, code revision, UTC timestamp, indexes, model deployments, complete answers, citations, retrieved counts, latency, individual judge scores, aggregate score, and candid failure analysis.
+
+The human judge reads every answer against the expected facts and sources, then scores correctness, completeness, grounding, and citation quality from 0 to 4 each for a maximum of 16 per case.
+
+Historical versions v0.0 through v0.5 were not run against these exact frozen bytes and are therefore labeled **Not evaluated on core-v1** rather than given reconstructed scores.
+
+## v0.6 - Frozen baseline and first measured comparison
+
+- **Date and evaluated code:** The live run occurred on 2026-08-21 against commit `34fc956aa5e87d6803fe9556afaaf1c6a510d066` plus the uncommitted v0.6 evaluation implementation that this version records.
+- **Objective:** The objective was to create an intentionally simple, reproducible vector-only control and measure the existing improved RAG against the same questions.
+- **Achieved:** All 11 documents were flattened into 53 deterministic baseline chunks using fixed 120-word windows with 20-word overlap and uploaded to the separate `enterprise-kb-baseline-v1` Azure Search index.
+- **How it works:** The baseline uses `text-embedding-3-small`, vector-only fixed Top-5 retrieval, and `gpt-4.1-mini`, with no keyword search, semantic ranking, query rewrite, decomposition, version preference, or question-specific tuning.
+- **How it works:** The current improved pipeline uses the separate 186-chunk structure-aware `enterprise-kb-improved-v1` index and its existing hybrid retrieval path with the same embedding, generation model, and frozen questions.
+- **Why:** A weak but fixed control makes retrieval changes measurable and prevents an attractive demonstration from being mistaken for evidence of improvement.
+- **Verification and evidence:** The baseline corpus fingerprint is `ba1733838a948e08093db141458d5b7e29302e9b612b9d2108556c1d53b16313`, and the evaluated core-v1 dataset SHA-256 is `9a76a255bd500a6f8a602a633d9c968b7bcaaff89a8b8bf279fa2c6684844f64`.
+- **Verification and evidence:** The live baseline upload reconciled 53 chunks with zero stale chunks, and the repository passed 79 tests, Ruff, and strict mypy before evaluation.
+- **Raw artifacts:** Complete machine-readable output is in `evaluation/results/core_v1_baseline_vs_improved_v0_6.json`, and the manual score rationale is in `evaluation/results/core_v1_baseline_vs_improved_v0_6_judgment.json`.
+- **Measured result:** Baseline scored **140/160 (87.5%)**, while improved scored **141/160 (88.1%)**, an immaterial one-point gain that does not support a claim of meaningful overall improvement.
+- **Measured result:** Baseline mean latency was 3,927.51 ms with 6,596.61 ms observed p95, while improved mean latency was 2,921.53 ms with 4,442.92 ms observed p95 across these ten sequential requests, with zero request errors in either pipeline.
+- **Known weaknesses or things going badly:** The improved pipeline is much better at complete inventory, but it is worse on the 250-seat spreadsheet calculation and misses the same exact 2026 Starter price as the baseline.
+- **Known weaknesses or things going badly:** The improved pipeline also omits the exact VPN portal URL, while the baseline omits that URL and fails to state the VPN-specific push requirement clearly.
+- **Next focus:** Fix spreadsheet row coverage, version-aware retrieval, and multi-source evidence completeness, then rerun these exact ten cases without changing them.
+
+### v0.6 scorecard
+
+| Case | Baseline | Improved | Judge finding |
+|---|---:|---:|---|
+| CORE-001 | 7/16 | 15/16 | Improved lists all 11 files, while baseline returns only five and confuses chunks with documents. |
+| CORE-002 | 16/16 | 16/16 | Both answer the finance cross-document question completely. |
+| CORE-003 | 12/16 | 11/16 | Both omit the portal URL, and improved has no VPNGuide citation. |
+| CORE-004 | 13/16 | 7/16 | Baseline calculates 35% and $42.25 but misses approval, while improved misses nearly the entire deal calculation. |
+| CORE-005 | 16/16 | 16/16 | Both answer and cite the HR timing facts correctly. |
+| CORE-006 | 16/16 | 16/16 | Both compare the legal survival terms correctly. |
+| CORE-007 | 16/16 | 16/16 | Both retrieve the current 2026 Professional values. |
+| CORE-008 | 12/16 | 12/16 | Both estimate rather than retrieve the exact 2026 Starter price of $32. |
+| CORE-009 | 16/16 | 16/16 | Both refuse the unsupported pet-insurance question correctly. |
+| CORE-010 | 16/16 | 16/16 | Both answer the startup-discount spreadsheet question completely. |
+| **Total** | **140/160** | **141/160** | **The observed difference is only 0.6 percentage points.** |
+
+### v0.6 complete recorded outputs
+
+The citations below list source paths for readability, while the raw artifact preserves every exact chunk ID, page or section value, retrieved count, and latency.
+
+#### CORE-001 - Baseline - 7/16
+
+> The documents currently in the knowledge base, grouped by department, are: People Operations / HR: LeavePolicy (two documents related to leave and holidays); Finance / Expense Management: ExpensePolicy; Sales Operations: Discounts and Pricing2025.
+>
+> No other departments or documents are mentioned in the provided evidence.
+
+Citations: `KnowledgeBase/HR/LeavePolicy.pdf`, `KnowledgeBase/Finance/ExpensePolicy.pdf`, `KnowledgeBase/Sales/Discounts.xlsx`, and `KnowledgeBase/Sales/Pricing2025.pdf`.
+
+#### CORE-001 - Improved - 15/16
+
+> 11 documents are indexed: ExpensePolicy, TravelPolicy, Benefits, LeavePolicy, PasswordPolicy, VPNGuide, NDA, VendorContract, Discounts, Pricing2025, and Pricing2026, with each complete KnowledgeBase department path shown.
+
+Citations: None required because this is the deterministic corpus inventory path.
+
+#### CORE-002 - Baseline - 16/16
+
+> For a single $3,000 business-travel expense, it must be submitted through ExpensePath within 30 calendar days of trip completion or purchase date, an itemized receipt is required because it is over the $25 threshold, and approval must come from the Department VP because the amount is between $2,500 and $10,000.
+
+Citations: `KnowledgeBase/Finance/ExpensePolicy.pdf` and `KnowledgeBase/Finance/TravelPolicy.docx`.
+
+#### CORE-002 - Improved - 16/16
+
+> For a single $3,000 business-travel expense, it must be submitted through ExpensePath within 30 calendar days of trip completion or purchase date, an itemized receipt is required because the expense is over $25, and approval must come from the Department VP because the amount is between $2,500 and $10,000.
+
+Citations: `KnowledgeBase/Finance/ExpensePolicy.pdf` and `KnowledgeBase/Finance/TravelPolicy.docx`.
+
+#### CORE-003 - Baseline - 12/16
+
+> The VPN is NorthLink VPN and requires MFA for every connection.
+>
+> Okta Verify is the primary required MFA method for all Company accounts, with push notification as the preferred factor.
+>
+> The minimum company password length is 12 characters.
+
+Citations: `KnowledgeBase/IT/VPNGuide.pdf` and `KnowledgeBase/IT/PasswordPolicy.docx`.
+
+#### CORE-003 - Improved - 11/16
+
+> The VPN portal that should be used by a remote employee is the Company VPN portal.
+>
+> The MFA method required is Okta Verify as the primary method.
+>
+> The minimum company password length is 12 characters.
+
+Citations: `KnowledgeBase/IT/PasswordPolicy.docx` only.
+
+#### CORE-004 - Baseline - 13/16
+
+> For 250 OrbitSuite seats on an annual prepaid term, the volume discount is 20% and the annual prepaid term discount is 15%, producing a combined 35% discount and a final price of $42.25 from the $65 list price.
+>
+> No CFO exception is needed, but the exact approver is not specified in the retrieved evidence.
+
+Citations: `KnowledgeBase/Sales/Discounts.xlsx`.
+
+#### CORE-004 - Improved - 7/16
+
+> The evidence does not provide the exact combined discount and final monthly per-seat price specifically for 250 OrbitSuite seats on an annual prepaid term.
+>
+> Annual prepaid contracts receive a 15% discount, but the final monthly per-seat price and approver are not specified in the retrieved evidence.
+
+Citations: `KnowledgeBase/Sales/Pricing2026.pdf`, `KnowledgeBase/Sales/Discounts.xlsx`, and `KnowledgeBase/Sales/Pricing2025.pdf`.
+
+#### CORE-005 - Baseline - 16/16
+
+> A new full-time employee begins accruing PTO on a bi-weekly basis starting on the first day of employment.
+>
+> Benefits coverage begins on the first day of the month following 30 days of employment.
+
+Citations: `KnowledgeBase/HR/LeavePolicy.pdf` and `KnowledgeBase/HR/Benefits.pdf`.
+
+#### CORE-005 - Improved - 16/16
+
+> A new full-time employee begins accruing PTO on a bi-weekly basis starting on the first day of employment.
+>
+> Benefits coverage begins on the first day of the month following 30 days of employment.
+
+Citations: `KnowledgeBase/HR/LeavePolicy.pdf` and `KnowledgeBase/HR/Benefits.pdf`.
+
+#### CORE-006 - Baseline - 16/16
+
+> Mutual NDA confidentiality survives three years after disclosure and indefinitely for trade secrets.
+>
+> Vendor Agreement confidentiality survives five years after termination and indefinitely for trade secrets.
+
+Citations: `KnowledgeBase/Legal/NDA.docx` and `KnowledgeBase/Legal/VendorContract.pdf`.
+
+#### CORE-006 - Improved - 16/16
+
+> Mutual NDA confidentiality survives three years after disclosure and indefinitely for trade secrets.
+>
+> Vendor Agreement confidentiality survives five years after termination and indefinitely for trade secrets.
+
+Citations: `KnowledgeBase/Legal/NDA.docx` and `KnowledgeBase/Legal/VendorContract.pdf`.
+
+#### CORE-007 - Baseline - 16/16
+
+> The current 2026 Professional tier monthly list price is $65 per seat per month, and its API limit is 100,000 calls per month.
+
+Citations: `KnowledgeBase/Sales/Pricing2026.pdf`.
+
+#### CORE-007 - Improved - 16/16
+
+> The current 2026 Professional tier monthly list price is $65 per seat per month, and its API limit is 100,000 calls per month.
+
+Citations: `KnowledgeBase/Sales/Pricing2026.pdf`.
+
+#### CORE-008 - Baseline - 12/16
+
+> The 2025 Starter price is $29 and the 2025 Advanced Analytics add-on is $12.
+>
+> The 2026 Advanced Analytics add-on is $14, but the exact Starter price was not retrieved and was estimated at $31.32 to $31.90 from an 8 to 10 percent increase.
+
+Citations: `KnowledgeBase/Sales/Pricing2025.pdf` and `KnowledgeBase/Sales/Pricing2026.pdf`.
+
+#### CORE-008 - Improved - 12/16
+
+> The 2025 Starter price is $29 and the 2025 Advanced Analytics add-on is $12.
+>
+> The 2026 Advanced Analytics add-on is $14, but the exact Starter price was not retrieved and was estimated at $31.32 to $31.90 from an 8 to 10 percent increase.
+
+Citations: `KnowledgeBase/Sales/Pricing2025.pdf` and `KnowledgeBase/Sales/Pricing2026.pdf`.
+
+#### CORE-009 - Baseline - 16/16
+
+> I could not find enough supporting information in the knowledge base to answer that.
+
+Citations: None.
+
+#### CORE-009 - Improved - 16/16
+
+> I could not find enough supporting information in the knowledge base to answer that.
+
+Citations: None.
+
+#### CORE-010 - Baseline - 16/16
+
+> The Year 1 startup discount is 30%.
+>
+> It cannot stack with volume or term discounts, and only the highest applicable single discount applies.
+>
+> Eligibility is checked annually.
+
+Citations: `KnowledgeBase/Sales/Discounts.xlsx`.
+
+#### CORE-010 - Improved - 16/16
+
+> The Year 1 startup discount is 30%.
+>
+> It cannot stack with volume or term discounts, and only the highest applicable single discount applies.
+>
+> Eligibility is checked annually.
+
+Citations: `KnowledgeBase/Sales/Discounts.xlsx`.

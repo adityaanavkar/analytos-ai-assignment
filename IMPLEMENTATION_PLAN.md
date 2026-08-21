@@ -44,13 +44,13 @@ Rules for every action:
 | A2 | Azure preflight, budget guardrails, and reproducible infrastructure | Complete | A1 | Active subscription, capability/quota report, reviewed Bicep deployment outputs |
 | A3 | Canonical document/chunk schema and metadata policy | In progress | A1 | Typed schemas and version/ACL/provenance tests |
 | A4 | PDF, DOCX, XLSX, and Blob ingestion | In progress | A2, A3 | All 11 files ingested without silent loss; dry-run and idempotency evidence |
-| A5 | Frozen baseline vector-only RAG | Pending | A2, A4 | Separate baseline index/config and immutable baseline results |
+| A5 | Frozen baseline vector-only RAG | In progress | A2, A4 | Separate baseline index/config and immutable baseline results |
 | A6 | Structure-aware chunking and hybrid retrieval | In progress | A5 | Improved index plus wrong-chunk and multi-section retrieval evidence |
 | A7 | Query analysis, decomposition, and conversation context | Pending | A6 | Ambiguous, comparison, historical, and follow-up tests |
 | A8 | Evidence sufficiency, grounded generation, and citation validation | In progress | A6, A7 | No-answer, grounding, and citation-tampering tests |
 | A9 | Retrieval-time department access control | Pending | A6 | Positive and negative cross-department security tests |
 | A10 | Chat API and lightweight browser UI | In progress | A7, A8, A9 | Working local demo with citations, clarification, ACLs, and diagnostics |
-| A11 | Frozen evaluation set and baseline/improved comparison | Pending | A5-A10 | Reproducible raw and summary reports with measured metrics |
+| A11 | Frozen evaluation set and baseline/improved comparison | In progress | A5-A10 | Reproducible raw and summary reports with measured metrics |
 | A12 | Observability, latency, tokens, and cost reporting | Pending | A10, A11 | Stage traces, safe telemetry, and dated cost calculation |
 | A13 | Production architecture and six problem-solving answers | Pending | A2-A12 | Exported diagram and reviewer-ready technical documentation |
 | A14 | Final verification, video script, and submission package | Pending | A13 | Clean verification run and complete submission checklist |
@@ -233,7 +233,16 @@ Acceptance checks:
 - Raw retrieval/generation outputs, latency, tokens, approximate cost, config,
   code revision, and timestamp are saved before A6 begins.
 
-Journal: **Status:** Pending. **What/How/Why/Evidence/Deviations:** TBD.
+Journal: **Status:** In progress.
+
+- **What:** Added a separate baseline corpus, Azure Search index, vector-only Top-5 retriever, grounded answer service, frozen ten-case regression set, live comparison output, and manual judgment artifact.
+- **How:** All 11 files are flattened without page, section, sheet, or table grouping into 53 deterministic baseline-scoped chunks using fixed 120-word windows with 20-word overlap.
+- **How:** The baseline uses a separate 1,536-dimension HNSW index, `search_text=None`, fixed Top-5 vector retrieval, and the same Azure embedding and generation deployments without rewrite, semantic ranking, decomposition, version preference, or question-specific tuning.
+- **Why:** A deliberately simple and reproducible control is needed to measure whether later retrieval changes improve quality instead of merely changing behavior.
+- **Evidence:** The live `enterprise-kb-baseline-v1` upload reconciled 53 chunks and zero stale chunks, with corpus fingerprint `ba1733838a948e08093db141458d5b7e29302e9b612b9d2108556c1d53b16313`.
+- **Evidence:** Twelve focused baseline ingestion, retrieval, and service tests pass, and the complete repository passes 79 tests, Ruff, and strict mypy.
+- **Evidence:** The first live ten-case comparison saved complete observable answers, citations, retrieved counts, latency, configuration, revision, and timestamp, then received a manual score of 140/160 for baseline and 141/160 for improved.
+- **Deviations/follow-up:** Token usage, approximate cost, and complete raw candidate-chunk payloads are not yet captured, so A5 remains in progress.
 
 ### A6 - Structure-aware chunking and hybrid retrieval
 
@@ -319,7 +328,15 @@ Acceptance checks:
 - Preserve raw outputs and judge explanations; report regressions as well as
   improvements and never claim improvement without measured evidence.
 
-Journal: **Status:** Pending. **What/How/Why/Evidence/Deviations:** TBD.
+Journal: **Status:** In progress.
+
+- **What:** Froze a permanent ten-case `core-v1` regression suite spanning inventory, cross-document synthesis, XLSX multi-row and cross-section retrieval, current and historical versions, and missing information.
+- **How:** Both pipelines run the same ordered case bytes and save the dataset hash, corpus fingerprint, commit, UTC timestamp, indexes, deployments, full answers, citations, retrieved counts, latency, blank manual judge forms, and a separate completed judgment artifact.
+- **How:** A human judge reads each answer against verified source facts and scores correctness, completeness, grounding, and citation quality from 0 to 4 each.
+- **Why:** An unchanged core suite makes regressions attributable and prevents question-specific tuning, silent case replacement, and automated keyword scores from being presented as expert evaluation.
+- **Evidence:** The audited dataset contains exactly ten stable IDs from `CORE-001` through `CORE-010`, and all ten expected answers and source targets were independently verified against the seven PDFs, three DOCX files, and XLSX workbook.
+- **Evidence:** The 2026-08-21 live run produced baseline 140/160 and improved 141/160, with complete case outputs and judge rationales preserved under `evaluation/results/` and copied into `VERSIONS.md`.
+- **Deviations/follow-up:** This permanent ten-case regression subset does not replace A11's required 20-case final set or its remaining retrieval metrics, token, cost, hallucination-rate, ambiguity, and follow-up coverage, so A11 remains in progress.
 
 ### A12 - Observability, latency, tokens, and cost reporting
 
